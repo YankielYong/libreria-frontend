@@ -1,3 +1,3 @@
 export enum Configuration {
-    BACKEND_HOST = 'http://localhost:3000'
+    BACKEND_HOST = import.meta.env.VITE_BACKEND_HOST
 }
