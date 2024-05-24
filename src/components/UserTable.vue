@@ -79,12 +79,12 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="password" class="font-semibold w-6rem">Password</label>
-          <InputText
-            id="password"
+          <label for="pwd" class="font-semibold w-6rem">Password</label>
+          <Password
             v-model="password"
-            class="flex-auto"
-            autocomplete="off"
+            inputId="pwd"
+            :feedback="false"
+            toggleMask
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
@@ -107,12 +107,7 @@
         </div>
         <div class="flex align-items-center gap-3 mb-5">
           <label for="role" class="font-semibold w-6rem">Role</label>
-          <InputText
-            id="role"
-            v-model="role"
-            class="flex-auto"
-            autocomplete="off"
-          />
+          <Dropdown v-model="role" variant="filled" :options="roles" optionLabel="name" placeholder="Select a Role" class="w-full md:w-14rem" />
         </div>
         <div class="flex justify-content-end gap-2">
           <Button
@@ -135,6 +130,7 @@ import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import UserService from '@/services/UserService';
 import type { IUser } from '@/interfaces/IUser';
+import { RoleType } from '@/util/enum/RoleType';
 
 const toast = useToast();
 const confirm = useConfirm();
@@ -150,10 +146,15 @@ const password = ref();
 const name = ref();
 const lastName = ref();
 const dni = ref();
-const role = ref();
+const role = ref(null);
 const submitted = ref(false);
 const newUser = ref();
 
+const roles = ref([
+  {name: RoleType.USER},
+  {name: RoleType.LIBRARIAN},
+  {name: RoleType.ADMIN},
+])
 const userDialog = ref(false);
 const userDeleteDialog = ref(false);
 const titleDialog = ref('');
@@ -256,7 +257,7 @@ const hideDialog = () => {
   name.value = '';
   lastName.value = '';
   dni.value = '';
-  role.value = '';
+  role.value = null;
 };
 
 onMounted(async () => {
@@ -288,14 +289,11 @@ initFilters();
   border-style: solid !important;
   border: 1px solid;
 }
-:deep(.p-input-icon) {
-  margin-top: -0.7rem !important;
-}
 :deep(.flex) {
   display: flex !important;
 }
 :deep(.p-dialog-content) {
-  padding: 0 1.5rem, 2rem, 1.5rem;
+  padding: 0 1.5rem, 4rem, 1.5rem;
 }
 .flex {
   display: flex !important;
@@ -306,4 +304,17 @@ button {
 .align-items-center {
   justify-content: space-between;
 }
+:deep(#pwd) {
+  padding-right: 12px !important;
+}
+:deep(.p-dropdown-label) {
+  width: 195px;
+}
+:deep(ul) {
+  padding-left: 0 !important;
+}
+:deep(.pi) {
+  margin-top: -0.7rem !important;
+}
+
 </style>
