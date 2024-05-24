@@ -6,6 +6,7 @@ export const useAuthStore = defineStore('auth', {
   state: () => {
     return {
       token: null,
+      role: null,
       error: '',
     };
   },
@@ -13,8 +14,6 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async signIn(email: string, password: string): Promise<boolean> {
       try {
-        const url = `${Configuration.BACKEND_HOST}/auth/signin`;
-        console.log(url);
         const res = await fetch(`${Configuration.BACKEND_HOST}/auth/signin`, {
           method: 'POST',
           headers: {
@@ -31,6 +30,7 @@ export const useAuthStore = defineStore('auth', {
 
         if ('error' in response) {
           this.token = null;
+          this.role = null;
           this.error = response.message;
           return false;
         }
@@ -41,6 +41,7 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         console.log(error);
         this.token = null;
+        this.role = null;
         this.error = 'FATAL ERROR';
         return false;
       }
@@ -68,16 +69,19 @@ export const useAuthStore = defineStore('auth', {
 
         if ('error' in response) {
           this.token = null;
+          this.role = null;
           this.error = response.error;
           return false;
         }
 
         this.token = response.token;
+        this.role = response.role;
         this.error = '';
         return true;
       } catch (error) {
         console.log(error);
         this.token = null;
+        this.role = null;
         this.error = 'FATAL ERROR';
         return false;
       }
@@ -92,6 +96,7 @@ export const useAuthStore = defineStore('auth', {
             headers: {
               Accept: 'application/json',
               'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.token}`
             },
           }
         );
@@ -100,11 +105,13 @@ export const useAuthStore = defineStore('auth', {
 
         if('statusCode' in response){
             this.token = null;
+            this.role = null;
             this.error = response.message;
             return false;
         }
 
         this.token = response.token;
+        this.role = response.role;
         this.error = '';
         return true;
 
@@ -118,6 +125,7 @@ export const useAuthStore = defineStore('auth', {
 
     logout() {
       this.token = null;
+      this.role = null;
       this.error = '';
     },
   },

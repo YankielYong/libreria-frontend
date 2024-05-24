@@ -40,7 +40,7 @@ class AuthorService {
   async create(author: AuthorDto): Promise<void> {
     try {
       const token = this.store.token;
-      const response = await fetch(`${Configuration.BACKEND_HOST}/author`, {
+      const res = await fetch(`${Configuration.BACKEND_HOST}/author`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -49,12 +49,50 @@ class AuthorService {
         },
         body: JSON.stringify(author),
       });
-      const { id } = await response.json();
+      const response = await res.json();
+      if('error' in response){
+        throw new Error(response.message);
+      }
+      const { id } = response;
       this.authors.value.push({ id, ...author });
     } catch (error) {
       console.log(error);
       throw new Error(`failed: ${error}`);
     }
+  }
+
+  async update(author: IAuthor): Promise<void> {
+    try {
+      const token = this.store.token;
+      const {id, ...details} = author;
+      const res = await fetch(`${Configuration.BACKEND_HOST}/author/${id}`, {
+        method: 'PATCH',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(details),
+      });
+      const response = await res.json();
+      if('error' in response){
+        throw new Error(response.message);
+      }
+      const index = this.authors.value.findIndex((a) => a.id === id)
+      if (index !== -1){
+        this.authors.value[index] = {id, ...details};
+      }
+    } catch (error) {
+      console.log(error);
+      throw new Error(`failed: ${error}`);
+    }
+  }
+
+  async canManage(): Promise<boolean> {
+    await this.store.refresh()
+    const role = this.store.role;
+    if(role === 'Admin' || role === 'Librarian') return true;
+    return false;
   }
 }
 
