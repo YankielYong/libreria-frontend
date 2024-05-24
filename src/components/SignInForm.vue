@@ -1,6 +1,6 @@
 <template>
   <div class="card">
-    <Toast position="top-right" style="width: 50%"/>
+    <Toast position="top-right" style="width: 50%" />
     <div class="container">
       <div class="form-group">
         <FloatLabel>
@@ -37,7 +37,11 @@
           Don't have an account? Sign Up
         </router-link>
       </div>
-      <i v-if="loading" class="pi pi-spin pi-spinner" style="font-size: 1.5rem; color: #10b981"></i>
+      <i
+        v-if="loading"
+        class="pi pi-spin pi-spinner"
+        style="font-size: 1.5rem; color: #10b981"
+      ></i>
     </div>
   </div>
 </template>
@@ -63,16 +67,22 @@ const signIn = async () => {
     router.push({ name: 'home' });
   } else {
     let error = store.error;
-    if(error.includes('email must be an email'))
-      error = 'Email not valid'
-    else if(error.includes('password must be longer than or equal to 8 characters'))
-      error = 'Password must be longer than or equal to 8 characters'
+    if (error.includes('email should not be empty'))
+      error = 'Email should not be empty';
+    else if (error.includes('password should not be empty'))
+      error = 'Password should not be empty';
+    else if (error.includes('email must be an email'))
+      error = 'Email not valid';
+    else if (
+      error.includes('password must be longer than or equal to 8 characters')
+    )
+      error = 'Password must be longer than or equal to 8 characters';
     toast.add({
-        severity: 'error',
-        summary: 'Login Failed',
-        detail: error,
-        life: 3000,
-      });
+      severity: 'error',
+      summary: 'Login Failed',
+      detail: error,
+      life: 3000,
+    });
   }
   loading.value = false;
 };
@@ -117,7 +127,7 @@ const signIn = async () => {
   transition: color 0.2s;
 }
 
-.register-p:hover{
+.register-p:hover {
   color: #056438;
 }
 

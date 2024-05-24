@@ -42,7 +42,7 @@
         <Column field="lastName" header="Last Name" :sortable="true"></Column>
         <Column field="email" header="Email" :sortable="true"></Column>
         <Column field="role" header="Role" :sortable="true"></Column>
-        <Column v-if="canManage" style="width: 100px">
+        <Column v-if="canManage" style="width: 90px">
           <template #body="slotProps">
             <Button
               icon="pi pi-trash"
