@@ -4,6 +4,7 @@
       <li><router-link to="/" class="nav-item">Home</router-link></li>
       <li><router-link to="/auth/signin" class="nav-item">Sign In</router-link></li>
       <li><router-link to="/author" class="nav-item">Authors</router-link></li>
+      <li><router-link to="/user" class="nav-item">Users</router-link></li>
     </ul>
   </nav>
   <router-view />
@@ -11,6 +12,9 @@
 
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
+import { useAuthStore } from './store/auth';
+
+const store = useAuthStore();
 </script>
 
 <style scoped>
