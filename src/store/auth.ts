@@ -70,7 +70,7 @@ export const useAuthStore = defineStore('auth', {
         if ('error' in response) {
           this.token = null;
           this.role = null;
-          this.error = response.error;
+          this.error = response.message;
           return false;
         }
 
@@ -96,25 +96,24 @@ export const useAuthStore = defineStore('auth', {
             headers: {
               Accept: 'application/json',
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${this.token}`
+              Authorization: `Bearer ${this.token}`,
             },
           }
         );
 
-        const response = await res.json()
+        const response = await res.json();
 
-        if('statusCode' in response){
-            this.token = null;
-            this.role = null;
-            this.error = response.message;
-            return false;
+        if ('statusCode' in response) {
+          this.token = null;
+          this.role = null;
+          this.error = response.message;
+          return false;
         }
 
         this.token = response.token;
         this.role = response.role;
         this.error = '';
         return true;
-
       } catch (error) {
         console.log(error);
         this.token = null;

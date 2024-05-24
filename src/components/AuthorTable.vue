@@ -1,6 +1,7 @@
 <template>
   <div class="card">
-    <Toast position="top-right" style="width: 70%" />
+    <Toast position="top-right" style="width: 50%" />
+    <ConfirmDialog></ConfirmDialog>
     <div class="container">
       <DataTable
         :value="authors"
@@ -46,10 +47,15 @@
               class="mr-2"
               @click="editAuthor(slotProps.data)"
             />
-            <Button icon="pi pi-trash" severity="danger" />
+            <Button
+              icon="pi pi-trash"
+              severity="danger"
+              @click="confirmDelete(slotProps.data)"
+            />
           </template>
         </Column>
       </DataTable>
+
       <Dialog
         v-model:visible="authorDialog"
         modal
@@ -93,10 +99,12 @@
 import { FilterMatchMode } from 'primevue/api';
 import { onMounted, ref, type Ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
 import AuthorService from '@/services/AuthorService';
 import type { IAuthor } from '@/interfaces/IAuthor';
 
 const toast = useToast();
+const confirm = useConfirm();
 
 const authorService = new AuthorService();
 const authors = authorService.getAuthors();
@@ -110,6 +118,7 @@ const submitted = ref(false);
 const authorToUpdate = ref();
 
 const authorDialog = ref(false);
+const authorDeleteDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
 const toUpdate = ref(false);
@@ -176,6 +185,50 @@ const editAuthor = (authorToEdit: IAuthor) => {
   titleDialog.value = 'Edit Author';
   subtitleDialog.value = "Edit the author's information";
   authorDialog.value = true;
+};
+
+const confirmDelete = (authorToDelete: IAuthor) => {
+  try {
+    let { id } = authorToDelete;
+    if (!id) id = -1;
+    author.value = authorToDelete;
+    confirm.require({
+      message: 'Do you want to delete this author?',
+      header: 'Delete author',
+      icon: 'pi pi-info-circle',
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Delete',
+      rejectClass: 'p-button-secondary',
+      acceptClass: 'p-button-danger',
+      accept: async () => {
+        await authorService.delete(id);
+        toast.add({
+          severity: 'success',
+          summary: 'Deleted',
+          detail: 'The author was deleted',
+          life: 3000,
+        });
+      },
+      reject: () => {
+        toast.add({
+          severity: 'error',
+          summary: 'Canceled',
+          detail: 'The operation was canceled',
+          life: 3000,
+        });
+      },
+    });
+  } catch (error) {
+    let errorMessage = 'An unknown error has ocurred';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    toast.add({
+      severity: 'error',
+      summary: errorMessage,
+      life: 3000,
+    });
+  }
 };
 
 const hideDialog = () => {

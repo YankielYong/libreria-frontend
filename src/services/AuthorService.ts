@@ -50,7 +50,7 @@ class AuthorService {
         body: JSON.stringify(author),
       });
       const response = await res.json();
-      if('error' in response){
+      if ('error' in response) {
         throw new Error(response.message);
       }
       const { id } = response;
@@ -64,7 +64,7 @@ class AuthorService {
   async update(author: IAuthor): Promise<void> {
     try {
       const token = this.store.token;
-      const {id, ...details} = author;
+      const { id, ...details } = author;
       const res = await fetch(`${Configuration.BACKEND_HOST}/author/${id}`, {
         method: 'PATCH',
         headers: {
@@ -75,12 +75,12 @@ class AuthorService {
         body: JSON.stringify(details),
       });
       const response = await res.json();
-      if('error' in response){
+      if ('error' in response) {
         throw new Error(response.message);
       }
-      const index = this.authors.value.findIndex((a) => a.id === id)
-      if (index !== -1){
-        this.authors.value[index] = {id, ...details};
+      const index = this.authors.value.findIndex((a) => a.id === id);
+      if (index !== -1) {
+        this.authors.value[index] = { id, ...details };
       }
     } catch (error) {
       console.log(error);
@@ -88,10 +88,34 @@ class AuthorService {
     }
   }
 
+  async delete(id: number): Promise<void> {
+    try {
+      const token = this.store.token;
+      const res = await fetch(`${Configuration.BACKEND_HOST}/author/${id}`, {
+        method: 'DELETE',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const response = await res.json();
+      if ('error' in response) {
+        throw new Error(response.message);
+      }
+      this.authors.value = this.authors.value.filter(
+        (author) => author.id !== id
+      );
+    } catch (error) {
+      console.log(error);
+      throw new Error(`failed: ${error}`);
+    }
+  }
+
   async canManage(): Promise<boolean> {
-    await this.store.refresh()
+    await this.store.refresh();
     const role = this.store.role;
-    if(role === 'Admin' || role === 'Librarian') return true;
+    if (role === 'Admin' || role === 'Librarian') return true;
     return false;
   }
 }
