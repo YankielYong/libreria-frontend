@@ -1,5 +1,6 @@
 <template>
   <div class="card">
+    <Toast position="top-right" style="width: 50%" />
     <div class="container">
       <div class="form-group">
         <FloatLabel>
@@ -66,20 +67,30 @@
       <Button
         label="Sign Up"
         raised
+        v-if="!loading"
         @click="signUp"
         :pt="{ root: { class: 'my-button' } }"
       />
+
+      <i
+        v-if="loading"
+        class="pi pi-spin pi-spinner"
+        style="font-size: 1.5rem; color: #10b981"
+      ></i>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue';
+import { useToast } from 'primevue/usetoast';
 import router from '@/router';
 import { UserDto } from '@/dto/UserDto';
 import useAuthStore from '@/store/auth';
 
 const store = useAuthStore();
+const toast = useToast();
+const loading = ref(false);
 
 let email = ref('');
 let name = ref('');
@@ -95,10 +106,43 @@ const signUp = async () => {
     lastName.value,
     dni.value
   );
+  loading.value = true;
   const response = await store.signUp(user);
   if (response) {
     router.push({ name: 'home' });
-  } else alert(store.error);
+  } else {
+    let error = store.error;
+    if (error.includes('email should not be empty'))
+      error = 'Email should not be empty';
+    if (error.includes('name should not be empty'))
+      error = 'Name should not be empty';
+    if (error.includes('lastName should not be empty'))
+      error = 'Last name should not be empty';
+    else if (error.includes('password should not be empty'))
+      error = 'Password should not be empty';
+    else if (
+      error.includes('dni must be longer than or equal to 11 characters')
+    )
+      error = 'DNI must have 11 digits';
+    else if (error.includes('dni must be a number string'))
+      error = 'DNI must have only digits';
+    else if (error.includes('email must be an email'))
+      error = 'Email not valid';
+    else if (
+      error.includes('password must be longer than or equal to 8 characters')
+    )
+      error = 'Password must be longer than or equal to 8 characters';
+    else if (error.includes('Invalid dni')) error = 'DNI not valid';
+    else if (error.includes('Ya existe la llave (dni)'))
+      error = 'DNI already exists';
+    toast.add({
+      severity: 'error',
+      summary: 'Login Failed',
+      detail: error,
+      life: 3000,
+    });
+  }
+  loading.value = false;
 };
 </script>
 
@@ -107,7 +151,7 @@ const signUp = async () => {
   border: none;
 }
 .container {
-  padding: 0!important;
+  padding: 0 !important;
   width: 250px;
   margin-top: 30px;
 }
@@ -129,5 +173,10 @@ const signUp = async () => {
 
 :deep(#pwd) {
   padding: 12px;
+}
+
+.pi {
+  width: 100%;
+  text-align: center;
 }
 </style>
