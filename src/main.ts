@@ -24,6 +24,7 @@ import InputIcon from 'primevue/inputicon';
 import IconField from 'primevue/iconfield'
 import Toolbar from 'primevue/toolbar'
 import Dialog from 'primevue/dialog'
+import Dropdown from 'primevue/dropdown';
 import 'primevue/resources/themes/lara-light-green/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css'
@@ -48,5 +49,6 @@ app.component('IconField', IconField);
 app.component('Toolbar', Toolbar);
 app.component('Dialog', Dialog);
 app.component('ConfirmDialog', ConfirmDialog);
+app.component('Dropdown', Dropdown);
 
 app.mount('#app');
