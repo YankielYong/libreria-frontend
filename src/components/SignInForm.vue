@@ -87,6 +87,16 @@ const signIn = async () => {
 }
 
 .register-p {
+  margin-top: 0.8rem;
+  display: inline-block;
   width: 100%;
+  text-align: center;
+  text-decoration: none;
+  color: #10b981;
+  transition: color 0.2s;
+}
+
+.register-p:hover{
+  color: #056438;
 }
 </style>

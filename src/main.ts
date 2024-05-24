@@ -1,3 +1,5 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap';
 // import './assets/main.css'
 
 import { createApp } from 'vue';
@@ -7,6 +9,8 @@ import router from './router';
 
 // Importaciones de PrimeVue
 import PrimeVue from 'primevue/config';
+import Toast from 'primevue/toast';
+import ToastService from 'primevue/toastservice';
 import FloatLabel from 'primevue/floatlabel';
 import InputText from 'primevue/inputtext';
 import Password from 'primevue/password';
@@ -14,17 +18,21 @@ import Divider from 'primevue/divider';
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import InputIcon from 'primevue/inputicon';
+import IconField from 'primevue/iconfield'
+import Toolbar from 'primevue/toolbar'
+import Dialog from 'primevue/dialog'
 import 'primevue/resources/themes/lara-light-green/theme.css';
-// import 'primeicons/primeicons.css'
-
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap';
+import 'primevue/resources/primevue.min.css';
+import 'primeicons/primeicons.css'
 
 const app = createApp(App);
 
 app.use(createPinia());
 app.use(router);
 app.use(PrimeVue);
+app.use(ToastService);
+app.component('Toast', Toast);
 app.component('FloatLabel', FloatLabel);
 app.component('InputText', InputText);
 app.component('Password', Password);
@@ -32,5 +40,9 @@ app.component('Button', Button);
 app.component('Divider', Divider);
 app.component('DataTable', DataTable);
 app.component('Column', Column);
+app.component('InputIcon', InputIcon);
+app.component('IconField', IconField);
+app.component('Toolbar', Toolbar);
+app.component('Dialog', Dialog);
 
 app.mount('#app');
