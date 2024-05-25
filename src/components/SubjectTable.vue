@@ -134,7 +134,7 @@ const saveSubject = async () => {
       hideDialog();
       toUpdate.value = false;
     } else {
-      console.log(subjectToUpdate.value);
+      
       await subjectService.create(subjectToUpdate.value);
       toast.add({
         severity: 'success',
@@ -146,7 +146,7 @@ const saveSubject = async () => {
   } catch (error) {
     let errorMessage = 'An unexpected error has ocurred';
     if (error instanceof Error) {
-      errorMessage = error.message;
+      errorMessage = handleError(error.message);
     }
     toast.add({
       severity: 'error',
@@ -232,6 +232,12 @@ onMounted(async () => {
   canManage.value = await subjectService.canManage();
   loading.value = false;
 });
+
+const handleError = (error: string): string => {
+  if (error.includes('name should not be empty'))
+    return 'Name should not be empty';
+    return error;
+};
 
 const initFilters = () => {
   filters.value = {
