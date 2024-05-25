@@ -3,13 +3,18 @@
     <Toast position="top-right" style="width: 50%" />
     <ConfirmDialog></ConfirmDialog>
     <div class="container">
+      <i
+        v-if="loading"
+        class="pi pi-spin pi-spinner big-loading"
+        style="font-size: 5rem; color: #10b981"
+      ></i>
       <DataTable
         :value="authors"
         v-model:filters="filters"
+        v-if="!loading"
         dataKey="id"
         :globalFilterFields="['name', 'lastName']"
         showGridlines
-        :loading="loading"
         sortField="lastName"
         :sortOrder="1"
         paginator
@@ -37,7 +42,6 @@
             />
           </div>
         </template>
-        <template #loading> Loading authors. Please wait. </template>
         <Column field="name" header="Name" sortable></Column>
         <Column field="lastName" header="Last Name" :sortable="true"></Column>
         <Column v-if="canManage" style="width: 144px">
@@ -87,8 +91,14 @@
             label="Cancel"
             severity="danger"
             @click="hideDialog"
+            :pt="{ root: { style: 'width: 30%' } }"
           ></Button>
-          <Button type="button" label="Save" @click="saveAuthor"></Button>
+          <Button
+            type="button"
+            :label="labelSaveButton"
+            @click="saveAuthor"
+            :pt="{ root: { style: 'width: 35%' } }"
+          ></Button>
         </div>
       </Dialog>
     </div>
@@ -114,26 +124,25 @@ const canManage = ref(false);
 const author: Ref<IAuthor> = ref({});
 const name = ref();
 const lastName = ref();
-const submitted = ref(false);
 const authorToUpdate = ref();
 
 const authorDialog = ref(false);
-const authorDeleteDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
+const labelSaveButton = ref('Save');
 const toUpdate = ref(false);
 
 const loading = ref(true);
 const filters = ref();
 
 const saveAuthor = async () => {
-  submitted.value = true;
   authorToUpdate.value = {
     id: author.value.id,
     name: name.value,
     lastName: lastName.value,
   };
   try {
+    labelSaveButton.value = 'Saving...';
     if (toUpdate.value) {
       await authorService.update(authorToUpdate.value);
       toast.add({
@@ -163,19 +172,23 @@ const saveAuthor = async () => {
       life: 3000,
     });
   }
+  labelSaveButton.value = 'Save';
 };
 
 const openNew = () => {
   author.value = {};
-  submitted.value = false;
+  name.value = '';
+  lastName.value = '';
 
   titleDialog.value = 'New Author';
   subtitleDialog.value = "Enter the author's information";
+  toUpdate.value = false;
   authorDialog.value = true;
 };
 
 const editAuthor = (authorToEdit: IAuthor) => {
   author.value = { ...authorToEdit };
+  console.log(author.value);
 
   name.value = author.value.name;
   lastName.value = author.value.lastName;
@@ -232,7 +245,7 @@ const confirmDelete = (authorToDelete: IAuthor) => {
 
 const hideDialog = () => {
   authorDialog.value = false;
-  submitted.value = false;
+  author.value = {};
   name.value = '';
   lastName.value = '';
   toUpdate.value = false;
@@ -269,6 +282,7 @@ initFilters();
 .container {
   margin-top: 20px;
   width: 80%;
+  text-align: center;
 }
 :deep(td),
 :deep(th) {
@@ -293,5 +307,11 @@ button {
 }
 .align-items-center {
   justify-content: space-between;
+}
+
+.big-loading {
+  height: 65vh;
+  text-align: center;
+  align-content: center;
 }
 </style>

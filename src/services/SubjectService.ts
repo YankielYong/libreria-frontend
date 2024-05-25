@@ -5,7 +5,6 @@ import useAuthStore from '@/store/auth';
 import { ref } from 'vue';
 import type { Ref } from 'vue';
 
-
 class SubjectService {
   private subjects: Ref<Array<ISubject>>;
 
@@ -31,7 +30,7 @@ class SubjectService {
       });
 
       const json = await response.json();
-      
+
       this.subjects.value = await json;
     } catch (error) {
       console.log(error);
@@ -55,7 +54,7 @@ class SubjectService {
         throw new Error(response.message);
       }
       const { id } = response;
-      this.subjects.value.push(new SubjectDto(subject.name));//revisar esta línea
+      this.subjects.value.push({ id, ...subject });
     } catch (error) {
       console.log(error);
       throw new Error(`failed: ${error}`);
@@ -65,8 +64,8 @@ class SubjectService {
   async update(subject: ISubject): Promise<void> {
     try {
       const token = this.store.token;
-      const { name, ...details } = subject;
-      const res = await fetch(`${Configuration.BACKEND_HOST}/subject/${name}`, {
+      const { id, ...details } = subject;
+      const res = await fetch(`${Configuration.BACKEND_HOST}/subject/${id}`, {
         method: 'PATCH',
         headers: {
           Accept: 'application/json',
@@ -79,9 +78,9 @@ class SubjectService {
       if ('error' in response) {
         throw new Error(response.message);
       }
-      const index = this.subjects.value.findIndex((a) => a.name === name);
+      const index = this.subjects.value.findIndex((s) => s.id === id);
       if (index !== -1) {
-        this.subjects.value[index] = { name, ...details };
+        this.subjects.value[index] = { id, ...details };
       }
     } catch (error) {
       console.log(error);
@@ -89,10 +88,10 @@ class SubjectService {
     }
   }
 
-  async delete(name:string): Promise<void> {
+  async delete(id: number): Promise<void> {
     try {
       const token = this.store.token;
-      const res = await fetch(`${Configuration.BACKEND_HOST}/subject/${name}`, {
+      const res = await fetch(`${Configuration.BACKEND_HOST}/subject/${id}`, {
         method: 'DELETE',
         headers: {
           Accept: 'application/json',
@@ -105,7 +104,7 @@ class SubjectService {
         throw new Error(response.message);
       }
       this.subjects.value = this.subjects.value.filter(
-        (subject) => subject.name !== name
+        (subject) => subject.id !== id
       );
     } catch (error) {
       console.log(error);
@@ -118,7 +117,7 @@ class SubjectService {
     const role = this.store.role;
     if (role === 'Admin' || role === 'Librarian') return true;
     return false;
-  }  
+  }
 }
 
-export default SubjectService
+export default SubjectService;

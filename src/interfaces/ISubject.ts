@@ -1,4 +1,4 @@
 export interface ISubject {
-    name?: string;
-    
+  id?: number;
+  name?: string;
 }
