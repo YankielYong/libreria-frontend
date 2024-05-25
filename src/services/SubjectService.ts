@@ -21,12 +21,14 @@ class SubjectService {
 
   async fetchAll(): Promise<void> {
     try {
+      const token = this.store.token;
       const url = `${Configuration.BACKEND_HOST}/subject`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
 
