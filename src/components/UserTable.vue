@@ -26,6 +26,7 @@
               <InputText
                 v-model="filters['global'].value"
                 placeholder="Keyword Search"
+                :pt="{ root: { class: 'my-inputtext' } }"
               />
             </IconField>
             <Button
@@ -57,7 +58,7 @@
         v-model:visible="userDialog"
         modal
         :header="titleDialog"
-        :style="{ width: '25rem' }"
+        :style="{ width: '28rem' }"
       >
         <p class="p-text-secondary block mb-5">{{ subtitleDialog }}</p>
         <div class="flex align-items-center gap-3 mb-3">
@@ -79,12 +80,12 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="pwd" class="font-semibold w-6rem">Password</label>
-          <Password
-            v-model="password"
-            inputId="pwd"
-            :feedback="false"
-            toggleMask
+          <label for="dni" class="font-semibold w-6rem">DNI</label>
+          <InputText
+            id="dni"
+            v-model="dni"
+            class="flex-auto"
+            autocomplete="off"
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
@@ -97,17 +98,25 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="dni" class="font-semibold w-6rem">DNI</label>
-          <InputText
-            id="dni"
-            v-model="dni"
-            class="flex-auto"
-            autocomplete="off"
+          <label for="pwd" class="font-semibold w-6rem">Password</label>
+          <Password
+            v-model="password"
+            inputId="pwd"
+            :feedback="false"
+            toggleMask
           />
         </div>
         <div class="flex align-items-center gap-3 mb-5">
           <label for="role" class="font-semibold w-6rem">Role</label>
-          <Dropdown v-model="role" variant="filled" :options="roles" optionLabel="name" placeholder="Select a Role" class="w-full md:w-14rem" />
+          <Dropdown
+            v-model="role"
+            variant="filled"
+            :options="roles"
+            optionLabel="name"
+            placeholder="Select a Role"
+            class="w-full md:w-14rem"
+            :pt="{ list: { style: 'padding: 0; margin-bottom: 0' } }"
+          />
         </div>
         <div class="flex justify-content-end gap-2">
           <Button
@@ -146,15 +155,15 @@ const password = ref();
 const name = ref();
 const lastName = ref();
 const dni = ref();
-const role = ref(null);
+const role = ref({ name: RoleType.USER });
 const submitted = ref(false);
 const newUser = ref();
 
 const roles = ref([
-  {name: RoleType.USER},
-  {name: RoleType.LIBRARIAN},
-  {name: RoleType.ADMIN},
-])
+  { name: RoleType.USER },
+  { name: RoleType.LIBRARIAN },
+  { name: RoleType.ADMIN },
+]);
 const userDialog = ref(false);
 const userDeleteDialog = ref(false);
 const titleDialog = ref('');
@@ -173,20 +182,20 @@ const saveUser = async () => {
     name: name.value,
     lastName: lastName.value,
     dni: dni.value,
+    role: role.value.name,
   };
   try {
-      console.log(newUser.value);
-      await userService.create(newUser.value);
-      toast.add({
-        severity: 'success',
-        summary: 'User created successfully',
-        life: 3000,
-      });
-      hideDialog();
+    await userService.create(newUser.value);
+    toast.add({
+      severity: 'success',
+      summary: 'User created successfully',
+      life: 3000,
+    });
+    hideDialog();
   } catch (error) {
     let errorMessage = 'An unknown error has ocurred';
     if (error instanceof Error) {
-      errorMessage = error.message;
+      errorMessage = handleError(error.message);
     }
     toast.add({
       severity: 'error',
@@ -252,12 +261,12 @@ const confirmDelete = (userToDelete: IUser) => {
 const hideDialog = () => {
   userDialog.value = false;
   submitted.value = false;
-  email.value='';
-  password.value='';
+  email.value = '';
+  password.value = '';
   name.value = '';
   lastName.value = '';
   dni.value = '';
-  role.value = null;
+  role.value = { name: RoleType.USER };
 };
 
 onMounted(async () => {
@@ -270,6 +279,28 @@ const initFilters = () => {
   filters.value = {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   };
+};
+
+const handleError = (error: string): string => {
+  if (error.includes('name should not be empty'))
+    return 'Name should not be empty';
+  if (error.includes('lastName should not be empty'))
+    return 'Last name should not be empty';
+  if (error.includes('dni must be longer than or equal to 11 characters'))
+    return 'DNI must have 11 digits';
+  if (error.includes('email should not be empty'))
+    return 'Email should not be empty';
+  if (error.includes('password must be longer than or equal to 8 characters'))
+    return 'Password must be longer than or equal to 8 characters';
+  if (error.includes('role must be one of the')) return 'Select a role';
+  if (error.includes('email must be an email')) return 'Email not valid';
+  if (error.includes('dni must be a number string'))
+    return 'DNI must have only digits';
+  if (error.includes('Invalid dni')) return 'DNI not valid';
+  if (error.includes('Ya existe la llave (dni)')) return 'DNI already exists';
+  if (error.includes('Email already exists')) return 'Email already exists';
+
+  return error;
 };
 
 initFilters();
@@ -308,13 +339,19 @@ button {
   padding-right: 12px !important;
 }
 :deep(.p-dropdown-label) {
-  width: 195px;
+  width: 12.5rem;
 }
 :deep(ul) {
   padding-left: 0 !important;
 }
-:deep(.pi) {
+:deep(.p-input-icon) {
   margin-top: -0.7rem !important;
 }
+.my-inputtext {
+  margin-top: 0.2rem;
+}
 
+:deep(#pv_id_11_list) {
+  padding-left: 0;
+}
 </style>
