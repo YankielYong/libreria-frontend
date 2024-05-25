@@ -144,7 +144,6 @@ const saveAuthor = async () => {
       hideDialog();
       toUpdate.value = false;
     } else {
-      console.log(authorToUpdate.value);
       await authorService.create(authorToUpdate.value);
       toast.add({
         severity: 'success',
@@ -156,7 +155,7 @@ const saveAuthor = async () => {
   } catch (error) {
     let errorMessage = 'An unknown error has ocurred';
     if (error instanceof Error) {
-      errorMessage = error.message;
+      errorMessage = handleError(error.message);
     }
     toast.add({
       severity: 'error',
@@ -244,6 +243,15 @@ onMounted(async () => {
   canManage.value = await authorService.canManage();
   loading.value = false;
 });
+
+const handleError = (error: string): string => {
+  if (error.includes('name should not be empty'))
+    return 'Name should not be empty';
+  if (error.includes('lastName should not be empty'))
+    return 'Last name should not be empty';
+
+  return error;
+};
 
 const initFilters = () => {
   filters.value = {
