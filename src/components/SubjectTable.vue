@@ -1,17 +1,21 @@
-
 <template>
   <div class="card">
     <Toast position="top-right" style="width: 50%" />
     <ConfirmDialog></ConfirmDialog>
     <div class="container">
+      <i
+        v-if="loading"
+        class="pi pi-spin pi-spinner big-loading"
+        style="font-size: 5rem; color: #10b981"
+      ></i>
       <DataTable
         :value="subjects"
         v-model:filters="filters"
+        v-if="!loading"
         dataKey="id"
-        :globalFilterFields="['subject']"
+        :globalFilterFields="['name']"
         showGridlines
-        :loading="loading"
-        sortField="lastName"
+        sortField="name"
         :sortOrder="1"
         paginator
         :rows="5"
@@ -39,7 +43,7 @@
           </div>
         </template>
         <template #loading> Loading subjects. Please wait. </template>
-        <Column field="subjects" header="Subjects" sortable></Column>
+        <Column field="name" header="Name" sortable></Column>
         <Column v-if="canManage" style="width: 144px">
           <template #body="slotProps">
             <Button
@@ -63,15 +67,14 @@
         :style="{ width: '25rem' }"
       >
         <p class="p-text-secondary block mb-5">{{ subtitleDialog }}</p>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="subject" class="font-semibold w-6rem">Subject</label>
+        <div class="flex align-items-center gap-3 mb-5">
+          <label for="name" class="font-semibold w-6rem">Name</label>
           <InputText
-            id="subject"
-            v-model="subject"
+            id="name"
+            v-model="name"
             class="flex-auto"
             autocomplete="off"
           />
-        
         </div>
         <div class="flex justify-content-end gap-2">
           <Button
@@ -79,8 +82,14 @@
             label="Cancel"
             severity="danger"
             @click="hideDialog"
+            :pt="{ root: { style: 'width: 30%' } }"
           ></Button>
-          <Button type="button" label="Save" @click="saveSubject"></Button>
+          <Button
+            type="button"
+            :label="labelSaveButton"
+            @click="saveSubject"
+            :pt="{ root: { style: 'width: 35%' } }"
+          ></Button>
         </div>
       </Dialog>
     </div>
@@ -105,25 +114,24 @@ const canManage = ref(false);
 
 const subject: Ref<ISubject> = ref({});
 const name = ref();
-const submitted = ref(false);
 const subjectToUpdate = ref();
 
 const subjectDialog = ref(false);
-const subjectDeleteDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
+const labelSaveButton = ref('Save');
 const toUpdate = ref(false);
 
 const loading = ref(true);
 const filters = ref();
 
 const saveSubject = async () => {
-  submitted.value = true;
   subjectToUpdate.value = {
-     name: name.value,
-   
+    id: subject.value.id,
+    name: name.value,
   };
   try {
+    labelSaveButton.value = 'Saving...';
     if (toUpdate.value) {
       await subjectService.update(subjectToUpdate.value);
       toast.add({
@@ -134,7 +142,6 @@ const saveSubject = async () => {
       hideDialog();
       toUpdate.value = false;
     } else {
-      console.log(subjectToUpdate.value);
       await subjectService.create(subjectToUpdate.value);
       toast.add({
         severity: 'success',
@@ -146,7 +153,7 @@ const saveSubject = async () => {
   } catch (error) {
     let errorMessage = 'An unexpected error has ocurred';
     if (error instanceof Error) {
-      errorMessage = error.message;
+      errorMessage = handleError(error.message);
     }
     toast.add({
       severity: 'error',
@@ -154,14 +161,16 @@ const saveSubject = async () => {
       life: 3000,
     });
   }
+  labelSaveButton.value = 'Save';
 };
 
 const openNew = () => {
   subject.value = {};
-  submitted.value = false;
+  name.value = '';
 
   titleDialog.value = 'New Subject';
   subtitleDialog.value = "Enter the subject's information";
+  toUpdate.value = false;
   subjectDialog.value = true;
 };
 
@@ -178,8 +187,8 @@ const editSubject = (subjectToEdit: ISubject) => {
 
 const confirmDelete = (subjectToDelete: ISubject) => {
   try {
-    let name = subjectToDelete.name;
-    if (!name) name = "-1";
+    let { id } = subjectToDelete;
+    if (!id) id = -1;
     subject.value = subjectToDelete;
     confirm.require({
       message: 'Do you want to delete this subject?',
@@ -190,7 +199,7 @@ const confirmDelete = (subjectToDelete: ISubject) => {
       rejectClass: 'p-button-secondary',
       acceptClass: 'p-button-danger',
       accept: async () => {
-        await subjectService.delete(name);
+        await subjectService.delete(id);
         toast.add({
           severity: 'success',
           summary: 'Deleted',
@@ -222,7 +231,7 @@ const confirmDelete = (subjectToDelete: ISubject) => {
 
 const hideDialog = () => {
   subjectDialog.value = false;
-  submitted.value = false;
+  subject.value = {};
   name.value = '';
   toUpdate.value = false;
 };
@@ -232,6 +241,13 @@ onMounted(async () => {
   canManage.value = await subjectService.canManage();
   loading.value = false;
 });
+
+const handleError = (error: string): string => {
+  if (error.includes('name should not be empty'))
+    return 'Name should not be empty';
+
+  return error;
+};
 
 const initFilters = () => {
   filters.value = {
@@ -249,6 +265,7 @@ initFilters();
 .container {
   margin-top: 20px;
   width: 80%;
+  text-align: center;
 }
 :deep(td),
 :deep(th) {
@@ -273,5 +290,10 @@ button {
 }
 .align-items-center {
   justify-content: space-between;
+}
+.big-loading {
+  height: 65vh;
+  text-align: center;
+  align-content: center;
 }
 </style>

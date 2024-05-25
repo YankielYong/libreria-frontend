@@ -6,6 +6,7 @@ import useAuthStore from '@/store/auth';
 import AuthorTableView from '@/views/AuthorTableView.vue';
 import UserTableView from '@/views/UserTableView.vue';
 import { RoleType } from '@/util/enum/RoleType';
+import SubjectTableView from '@/views/SubjectTableView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +44,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/subject',
+      name: 'subjectTable',
+      component: SubjectTableView,
+      meta: {
+        requireAuth: false,
+      },
+    },
+    {
       path: '/user',
       name: 'userTable',
       component: UserTableView,
@@ -60,18 +69,19 @@ router.beforeEach(async (to, from, next) => {
   const store = useAuthStore();
   const isAuth = store.token;
 
-  if(!to.meta.requireAuth) next();
-  else if(isAuth !== null) {
-    if(to.meta.restringed){
+  if (!to.meta.requireAuth) next();
+  else if (isAuth !== null) {
+    if (to.meta.restringed) {
       await store.refresh();
       const role = store.role;
-      if((role === 'Admin' && to.meta.admin) || (role === 'Librarian' && to.meta.librarian)) 
+      if (
+        (role === 'Admin' && to.meta.admin) ||
+        (role === 'Librarian' && to.meta.librarian)
+      )
         next();
       else throw new Error('Unhautorized');
-    }
-    else next();
-  }
-  else next({name: 'signin'});
+    } else next();
+  } else next({ name: 'signin' });
 });
 
 export default router;

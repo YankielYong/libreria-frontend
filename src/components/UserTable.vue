@@ -3,13 +3,18 @@
     <Toast position="top-right" style="width: 50%" />
     <ConfirmDialog></ConfirmDialog>
     <div class="container">
+      <i
+        v-if="loading"
+        class="pi pi-spin pi-spinner big-loading"
+        style="font-size: 5rem; color: #10b981"
+      ></i>
       <DataTable
         :value="users"
         v-model:filters="filters"
         dataKey="id"
         :globalFilterFields="['name', 'lastName', 'email', 'role']"
         showGridlines
-        :loading="loading"
+        v-if="!loading"
         sortField="lastName"
         :sortOrder="1"
         paginator
@@ -38,7 +43,6 @@
             />
           </div>
         </template>
-        <template #loading> Loading users. Please wait. </template>
         <Column field="name" header="Name" sortable></Column>
         <Column field="lastName" header="Last Name" :sortable="true"></Column>
         <Column field="email" header="Email" :sortable="true"></Column>
@@ -124,8 +128,14 @@
             label="Cancel"
             severity="danger"
             @click="hideDialog"
+            :pt="{ root: { style: 'width: 30%' } }"
           ></Button>
-          <Button type="button" label="Save" @click="saveUser"></Button>
+          <Button
+            type="button"
+            :label="labelSaveButton"
+            @click="saveUser"
+            :pt="{ root: { style: 'width: 35%' } }"
+          ></Button>
         </div>
       </Dialog>
     </div>
@@ -156,7 +166,6 @@ const name = ref();
 const lastName = ref();
 const dni = ref();
 const role = ref({ name: RoleType.USER });
-const submitted = ref(false);
 const newUser = ref();
 
 const roles = ref([
@@ -165,16 +174,14 @@ const roles = ref([
   { name: RoleType.ADMIN },
 ]);
 const userDialog = ref(false);
-const userDeleteDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
-const toUpdate = ref(false);
+const labelSaveButton = ref('Save');
 
 const loading = ref(true);
 const filters = ref();
 
 const saveUser = async () => {
-  submitted.value = true;
   newUser.value = {
     id: user.value.id,
     email: email.value,
@@ -185,6 +192,7 @@ const saveUser = async () => {
     role: role.value.name,
   };
   try {
+    labelSaveButton.value = 'Saving...';
     await userService.create(newUser.value);
     toast.add({
       severity: 'success',
@@ -203,11 +211,17 @@ const saveUser = async () => {
       life: 3000,
     });
   }
+  labelSaveButton.value = 'Save';
 };
 
 const openNew = () => {
   user.value = {};
-  submitted.value = false;
+  email.value = '';
+  password.value = '';
+  name.value = '';
+  lastName.value = '';
+  dni.value = '';
+  role.value = { name: RoleType.USER };
 
   titleDialog.value = 'New User';
   subtitleDialog.value = "Enter the user's information";
@@ -260,7 +274,7 @@ const confirmDelete = (userToDelete: IUser) => {
 
 const hideDialog = () => {
   userDialog.value = false;
-  submitted.value = false;
+  user.value = {};
   email.value = '';
   password.value = '';
   name.value = '';
@@ -313,6 +327,7 @@ initFilters();
 .container {
   margin-top: 20px;
   width: 80%;
+  text-align: center;
 }
 :deep(td),
 :deep(th) {
@@ -353,5 +368,11 @@ button {
 
 :deep(#pv_id_11_list) {
   padding-left: 0;
+}
+
+.big-loading {
+  height: 65vh;
+  text-align: center;
+  align-content: center;
 }
 </style>
