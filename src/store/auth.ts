@@ -88,37 +88,39 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async refresh() {
-      try {
-        const res = await fetch(
-          `${Configuration.BACKEND_HOST}/auth/check-status`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${this.token}`,
-            },
+      if (this.token) {
+        try {
+          const res = await fetch(
+            `${Configuration.BACKEND_HOST}/auth/check-status`,
+            {
+              method: 'GET',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.token}`,
+              },
+            }
+          );
+
+          const response = await res.json();
+
+          if ('statusCode' in response) {
+            this.token = null;
+            this.role = null;
+            this.error = response.message;
+            return false;
           }
-        );
 
-        const response = await res.json();
-
-        if ('statusCode' in response) {
+          this.token = response.token;
+          this.role = response.role;
+          this.error = '';
+          return true;
+        } catch (error) {
+          console.log(error);
           this.token = null;
-          this.role = null;
-          this.error = response.message;
+          this.error = 'FATAL ERROR';
           return false;
         }
-
-        this.token = response.token;
-        this.role = response.role;
-        this.error = '';
-        return true;
-      } catch (error) {
-        console.log(error);
-        this.token = null;
-        this.error = 'FATAL ERROR';
-        return false;
       }
     },
 

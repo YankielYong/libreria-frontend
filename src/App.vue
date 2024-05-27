@@ -5,6 +5,7 @@
       <li>
         <router-link to="/auth/signin" class="nav-item">Sign In</router-link>
       </li>
+      <li><router-link to="/book" class="nav-item">Books</router-link></li>
       <li><router-link to="/author" class="nav-item">Authors</router-link></li>
       <li>
         <router-link to="/subject" class="nav-item">Subjects</router-link>

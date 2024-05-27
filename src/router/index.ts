@@ -7,6 +7,7 @@ import AuthorTableView from '@/views/AuthorTableView.vue';
 import UserTableView from '@/views/UserTableView.vue';
 import { RoleType } from '@/util/enum/RoleType';
 import SubjectTableView from '@/views/SubjectTableView.vue';
+import BookDetailsView from '@/views/BookDetailsView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -31,6 +32,14 @@ const router = createRouter({
       path: '/auth/signup',
       name: 'signup',
       component: AuthSignUpView,
+      meta: {
+        requireAuth: false,
+      },
+    },
+    {
+      path: '/book',
+      name: 'bookDetails',
+      component: BookDetailsView,
       meta: {
         requireAuth: false,
       },
