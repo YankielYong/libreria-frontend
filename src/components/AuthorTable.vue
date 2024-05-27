@@ -188,7 +188,6 @@ const openNew = () => {
 
 const editAuthor = (authorToEdit: IAuthor) => {
   author.value = { ...authorToEdit };
-  console.log(author.value);
 
   name.value = author.value.name;
   lastName.value = author.value.lastName;
@@ -248,6 +247,7 @@ const hideDialog = () => {
   author.value = {};
   name.value = '';
   lastName.value = '';
+
   toUpdate.value = false;
 };
 

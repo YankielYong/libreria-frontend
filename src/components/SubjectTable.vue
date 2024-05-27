@@ -242,6 +242,7 @@ onMounted(async () => {
   loading.value = false;
 });
 
+// TO DO
 const handleError = (error: string): string => {
   if (error.includes('name should not be empty'))
     return 'Name should not be empty';

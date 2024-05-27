@@ -114,7 +114,6 @@
           <label for="role" class="font-semibold w-6rem">Role</label>
           <Dropdown
             v-model="role"
-            variant="filled"
             :options="roles"
             optionLabel="name"
             placeholder="Select a Role"
@@ -324,50 +323,54 @@ initFilters();
 .card {
   border: none;
 }
+
 .container {
   margin-top: 20px;
   width: 80%;
   text-align: center;
 }
+
 :deep(td),
 :deep(th) {
   border-color: #e5e7eb !important;
   border-style: solid !important;
   border: 1px solid;
 }
+
 :deep(.flex) {
   display: flex !important;
 }
+
 :deep(.p-dialog-content) {
   padding: 0 1.5rem, 4rem, 1.5rem;
 }
+
 .flex {
   display: flex !important;
 }
+
 button {
   margin: 0.2rem;
 }
+
 .align-items-center {
   justify-content: space-between;
 }
+
 :deep(#pwd) {
   padding-right: 12px !important;
 }
+
 :deep(.p-dropdown-label) {
   width: 12.5rem;
 }
+
 :deep(ul) {
   padding-left: 0 !important;
 }
-:deep(.p-input-icon) {
-  margin-top: -0.7rem !important;
-}
+
 .my-inputtext {
   margin-top: 0.2rem;
-}
-
-:deep(#pv_id_11_list) {
-  padding-left: 0;
 }
 
 .big-loading {

@@ -21,13 +21,17 @@ import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import InputIcon from 'primevue/inputicon';
-import IconField from 'primevue/iconfield'
-import Toolbar from 'primevue/toolbar'
-import Dialog from 'primevue/dialog'
+import IconField from 'primevue/iconfield';
+import Toolbar from 'primevue/toolbar';
+import Dialog from 'primevue/dialog';
 import Dropdown from 'primevue/dropdown';
+import DataView from 'primevue/dataview';
+import InputNumber from 'primevue/inputnumber';
+import Textarea from 'primevue/textarea';
+import MultiSelect from 'primevue/multiselect';
 import 'primevue/resources/themes/lara-light-green/theme.css';
 import 'primevue/resources/primevue.min.css';
-import 'primeicons/primeicons.css'
+import 'primeicons/primeicons.css';
 
 const app = createApp(App);
 
@@ -50,5 +54,9 @@ app.component('Toolbar', Toolbar);
 app.component('Dialog', Dialog);
 app.component('ConfirmDialog', ConfirmDialog);
 app.component('Dropdown', Dropdown);
+app.component('DataView', DataView);
+app.component('InputNumber', InputNumber);
+app.component('Textarea', Textarea);
+app.component('MultiSelect', MultiSelect);
 
 app.mount('#app');
