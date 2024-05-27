@@ -153,7 +153,7 @@ const saveSubject = async () => {
   } catch (error) {
     let errorMessage = 'An unexpected error has ocurred';
     if (error instanceof Error) {
-      errorMessage = handleError(error.message);
+      errorMessage = error.message;
     }
     toast.add({
       severity: 'error',
