@@ -10,6 +10,7 @@ import SubjectTableView from '@/views/SubjectTableView.vue';
 import BookDetailsView from '@/views/BookDetailsView.vue';
 import LoanTableView from '@/views/LoanTableView.vue';
 import BookCopyTableView from '@/views/BookCopyTableView.vue';
+import SanctionTableView from '@/views/SanctionTableView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -74,6 +75,14 @@ const router = createRouter({
       path: '/loan',
       name: 'loanTable',
       component: LoanTableView,
+      meta: {
+        requireAuth: false,
+      },
+    },
+    {
+      path: '/sanction',
+      name: 'sanctionTable',
+      component: SanctionTableView,
       meta: {
         requireAuth: false,
       },

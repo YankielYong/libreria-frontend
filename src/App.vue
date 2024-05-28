@@ -13,11 +13,23 @@
       <li>
         <router-link to="/book-copy" class="nav-item">Book Copies</router-link>
       </li>
+      <li><router-link to="/loan" class="nav-item">Loans</router-link></li>
       <li>
-        <router-link to="/loan" class="nav-item">Loans</router-link>
+        <router-link to="/sanction" class="nav-item">Sanctions</router-link>
       </li>
       <li><router-link to="/user" class="nav-item">Users</router-link></li>
     </ul>
+    <div>
+      <select v-model="$i18n.locale">
+        <option
+          v-for="(locale, index) in $i18n.availableLocales"
+          :key="index"
+          :value="locale"
+        >
+          {{ locale }}
+        </option>
+      </select>
+    </div>
   </nav>
   <router-view />
 </template>

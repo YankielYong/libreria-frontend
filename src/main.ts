@@ -4,8 +4,10 @@ import 'bootstrap';
 
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
+import { createI18n } from 'vue-i18n';
 import App from './App.vue';
 import router from './router';
+import { messages } from './i18n/messages';
 
 // Importaciones de PrimeVue
 import PrimeVue from 'primevue/config';
@@ -36,8 +38,15 @@ import 'primeicons/primeicons.css';
 
 const app = createApp(App);
 
+const i18n = createI18n({
+  locale: 'English',
+  fallbackLocale: 'English',
+  messages,
+});
+
 app.use(createPinia());
 app.use(router);
+app.use(i18n);
 app.use(PrimeVue);
 app.use(ToastService);
 app.use(ConfirmationService);
