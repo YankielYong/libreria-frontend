@@ -1,86 +1,100 @@
-import { AuthorDto } from '@/dto/AuthorDto';
-import type { IAuthor } from '@/interfaces/IAuthor';
-import useAuthStore from '@/store/auth';
+import type { IBookCopy } from '@/interfaces/IBookCopy';
 import { Configuration } from '@/util/enum/Configuration';
+import { BookCopyDto } from '@/dto/BookCopyDto';
+import useAuthStore from '@/store/auth';
 import { ref } from 'vue';
 import type { Ref } from 'vue';
 
-class AuthorService {
-  private authors: Ref<Array<IAuthor>>;
+class BookCopyService {
+  private bookCopies: Ref<Array<IBookCopy>>;
+  private availables: Ref<Array<IBookCopy>>;
 
   private readonly store = useAuthStore();
 
   constructor() {
-    this.authors = ref<Array<IAuthor>>([]);
+    this.bookCopies = ref<Array<IBookCopy>>([]);
+    this.availables = ref<Array<IBookCopy>>([]);
   }
 
-  getAuthors(): Ref<Array<IAuthor>> {
-    return this.authors;
+  getBookCopies(): Ref<Array<IBookCopy>> {
+    return this.bookCopies;
+  }
+
+  getAvailables() {
+    return this.availables;
   }
 
   async fetchAll(): Promise<void> {
     try {
-      const url = `${Configuration.BACKEND_HOST}/author`;
+      const token = this.store.token;
+      const url = `${Configuration.BACKEND_HOST}/book-copy`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const json = await response.json();
 
-      this.authors.value = await json;
+      this.bookCopies.value = await json;
+      this.availables.value = this.bookCopies.value.filter(
+        (b) => b.available === true
+      );
     } catch (error) {
       console.log(error);
     }
   }
 
-  async create(author: AuthorDto): Promise<void> {
+  async create(bookCopy: BookCopyDto): Promise<void> {
     try {
+      const { book } = bookCopy;
+      const bookId = book.id;
       const token = this.store.token;
-      const res = await fetch(`${Configuration.BACKEND_HOST}/author`, {
+      const res = await fetch(`${Configuration.BACKEND_HOST}/book-copy`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(author),
+        body: JSON.stringify({ book: bookId }),
       });
       const response = await res.json();
       if ('error' in response) {
         throw new Error(response.message);
       }
       const { id } = response;
-      this.authors.value.push({ id, ...author });
+      this.bookCopies.value.push({ id, book });
     } catch (error) {
       console.log(error);
       throw new Error(`failed: ${error}`);
     }
   }
 
-  async update(author: IAuthor): Promise<void> {
+  async update(bookCopy: IBookCopy): Promise<void> {
     try {
       const token = this.store.token;
-      const { id, ...details } = author;
-      const res = await fetch(`${Configuration.BACKEND_HOST}/author/${id}`, {
+      const { id, book } = bookCopy;
+      const bookId = book?.id;
+      const res = await fetch(`${Configuration.BACKEND_HOST}/book-copy/${id}`, {
         method: 'PATCH',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(details),
+        body: JSON.stringify({ book: bookId }),
       });
       const response = await res.json();
       if ('error' in response) {
         throw new Error(response.message);
       }
-      const index = this.authors.value.findIndex((a) => a.id === id);
+      const index = this.bookCopies.value.findIndex((b) => b.id === id);
       if (index !== -1) {
-        this.authors.value[index] = { id, ...details };
+        this.bookCopies.value[index] = { id, book };
       }
     } catch (error) {
       console.log(error);
@@ -88,10 +102,10 @@ class AuthorService {
     }
   }
 
-  async delete(id: number | undefined): Promise<void> {
+  async delete(id: number): Promise<void> {
     try {
       const token = this.store.token;
-      const res = await fetch(`${Configuration.BACKEND_HOST}/author/${id}`, {
+      const res = await fetch(`${Configuration.BACKEND_HOST}/book-copy/${id}`, {
         method: 'DELETE',
         headers: {
           Accept: 'application/json',
@@ -103,8 +117,8 @@ class AuthorService {
       if ('error' in response) {
         throw new Error(response.message);
       }
-      this.authors.value = this.authors.value.filter(
-        (author) => author.id !== id
+      this.bookCopies.value = this.bookCopies.value.filter(
+        (bookCopy) => bookCopy.id !== id
       );
     } catch (error) {
       console.log(error);
@@ -120,4 +134,4 @@ class AuthorService {
   }
 }
 
-export default AuthorService;
+export default BookCopyService;

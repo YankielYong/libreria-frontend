@@ -9,13 +9,13 @@
         style="font-size: 5rem; color: #10b981"
       ></i>
       <DataTable
-        :value="authors"
+        :value="bookCopies"
         v-model:filters="filters"
         v-if="!loading"
         dataKey="id"
-        :globalFilterFields="['name', 'lastName']"
+        :globalFilterFields="['book.title']"
         showGridlines
-        sortField="lastName"
+        sortField="id"
         :sortOrder="1"
         paginator
         :rows="5"
@@ -30,35 +30,27 @@
               </InputIcon>
               <InputText
                 v-model="filters['global'].value"
-                :placeholder="t('components.authorTable.keywordSearch')"
+                placeholder="Keyword Search"
                 :pt="{ root: { style: 'margin-top: 0.2rem' } }"
               />
             </IconField>
             <Button
               v-if="canManage"
-              :label="t('components.authorTable.new')"
+              label="New"
               icon="pi pi-plus"
               class="mr-2"
               @click="openNew"
             />
           </div>
         </template>
-        <Column
-          field="name"
-          :header="t('components.authorTable.name')"
-          sortable
-        ></Column>
-        <Column
-          field="lastName"
-          :header="t('components.authorTable.lastName')"
-          :sortable="true"
-        ></Column>
+        <Column field="book.title" header="Book" sortable></Column>
+
         <Column v-if="canManage" style="width: 144px">
           <template #body="slotProps">
             <Button
               icon="pi pi-pencil"
               class="mr-2"
-              @click="editAuthor(slotProps.data)"
+              @click="editBookCopy(slotProps.data)"
             />
             <Button
               icon="pi pi-trash"
@@ -70,38 +62,31 @@
       </DataTable>
 
       <Dialog
-        v-model:visible="authorDialog"
+        v-model:visible="bookCopyDialog"
         modal
         :header="titleDialog"
         :style="{ width: '25rem' }"
       >
         <p class="p-text-secondary block mb-5">{{ subtitleDialog }}</p>
-        <div class="flex align-items-center gap-3 mb-3">
-          <label for="name" class="font-semibold w-6rem">{{
-            t('components.authorTable.name')
-          }}</label>
-          <InputText
-            id="name"
-            v-model="name"
-            class="flex-auto"
-            autocomplete="off"
-          />
-        </div>
         <div class="flex align-items-center gap-3 mb-5">
-          <label for="lastname" class="font-semibold w-6rem">{{
-            t('components.authorTable.lastName')
-          }}</label>
-          <InputText
-            id="lastname"
-            v-model="lastName"
-            class="flex-auto"
-            autocomplete="off"
+          <label for="book" class="font-semibold w-6rem">Book</label>
+          <Dropdown
+            v-model="book"
+            filter
+            :options="books"
+            optionLabel="title"
+            placeholder="Select a book"
+            class="w-full md:w-14rem"
+            :pt="{
+              list: { style: 'padding: 0; margin-bottom: 0' },
+              input: { style: 'width: 12.5rem' },
+            }"
           />
         </div>
         <div class="flex justify-content-end gap-2">
           <Button
             type="button"
-            :label="t('components.authorTable.cancel')"
+            label="Cancel"
             severity="danger"
             @click="hideDialog"
             :pt="{ root: { style: 'width: 30%' } }"
@@ -109,8 +94,8 @@
           <Button
             type="button"
             :label="labelSaveButton"
-            @click="saveAuthor"
-            :pt="{ root: { style: 'width: 40%' } }"
+            @click="saveBookCopy"
+            :pt="{ root: { style: 'width: 35%' } }"
           ></Button>
         </div>
       </Dialog>
@@ -123,62 +108,62 @@ import { FilterMatchMode } from 'primevue/api';
 import { onMounted, ref, type Ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
-import { useI18n } from 'vue-i18n';
-import AuthorService from '@/services/AuthorService';
-import type { IAuthor } from '@/interfaces/IAuthor';
+import BookCopyService from '@/services/BookCopyService';
+import type { IBookCopy } from '@/interfaces/IBookCopy';
+import BookService from '@/services/BookService';
+import type { IBook } from '@/interfaces/IBook';
 
 const toast = useToast();
 const confirm = useConfirm();
-const { t } = useI18n();
 
-const authorService = new AuthorService();
-const authors = authorService.getAuthors();
+const bookCopyService = new BookCopyService();
+const bookCopies = bookCopyService.getBookCopies();
+
+const bookService = new BookService();
+const books = bookService.getBooks();
 
 const canManage = ref(false);
 
-const author: Ref<IAuthor> = ref({});
-const name = ref();
-const lastName = ref();
-const authorToUpdate = ref();
+const bookCopy: Ref<IBookCopy> = ref({});
+const book: Ref<IBook> = ref({});
+const bookCopyToUpdate = ref();
 
-const authorDialog = ref(false);
+const bookCopyDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
-const labelSaveButton = ref('');
-labelSaveButton.value = t('components.authorTable.save');
+const labelSaveButton = ref('Save');
 const toUpdate = ref(false);
 
 const loading = ref(true);
 const filters = ref();
 
-const saveAuthor = async () => {
-  authorToUpdate.value = {
-    id: author.value.id,
-    name: name.value,
-    lastName: lastName.value,
+const saveBookCopy = async () => {
+  bookCopyToUpdate.value = {
+    id: bookCopy.value.id,
+    book: book.value,
   };
   try {
-    labelSaveButton.value = t('components.authorTable.saving');
+    labelSaveButton.value = 'Saving...';
     if (toUpdate.value) {
-      await authorService.update(authorToUpdate.value);
+      await bookCopyService.update(bookCopyToUpdate.value);
       toast.add({
         severity: 'success',
-        summary: t('components.authorTable.authorUpdated'),
+        summary: 'Book copy updated successfully',
         life: 3000,
       });
       hideDialog();
       toUpdate.value = false;
     } else {
-      await authorService.create(authorToUpdate.value);
+      await bookCopyService.create(bookCopyToUpdate.value);
       toast.add({
         severity: 'success',
-        summary: t('components.authorTable.authorCreated'),
+        summary: 'Book copy created successfully',
         life: 3000,
       });
       hideDialog();
     }
   } catch (error) {
-    let errorMessage = t('components.authorTable.unknowError');
+    let errorMessage = 'An unknown error has ocurred';
     if (error instanceof Error) {
       errorMessage = handleError(error.message);
     }
@@ -188,64 +173,63 @@ const saveAuthor = async () => {
       life: 3000,
     });
   }
-  labelSaveButton.value = t('components.authorTable.save');
+  labelSaveButton.value = 'Save';
 };
 
 const openNew = () => {
-  author.value = {};
-  name.value = '';
-  lastName.value = '';
+  bookCopy.value = {};
+  book.value = {};
 
-  titleDialog.value = t('components.authorTable.newAuthorTitle');
-  subtitleDialog.value = t('components.authorTable.newAuthorSubtitle');
+  titleDialog.value = 'New Book Copy';
+  subtitleDialog.value = "Enter the book copy's information";
   toUpdate.value = false;
-  authorDialog.value = true;
+  bookCopyDialog.value = true;
 };
 
-const editAuthor = (authorToEdit: IAuthor) => {
-  author.value = { ...authorToEdit };
+const editBookCopy = (bookCopyToEdit: IBookCopy) => {
+  bookCopy.value = { ...bookCopyToEdit };
 
-  name.value = author.value.name;
-  lastName.value = author.value.lastName;
+  book.value = books.value.filter((b) => b.id === bookCopy.value.book?.id)[0];
   toUpdate.value = true;
 
-  titleDialog.value = t('components.authorTable.editAuthorTitle');
-  subtitleDialog.value = t('components.authorTable.editAuthorSubtitle');
-  authorDialog.value = true;
+  titleDialog.value = 'Edit Book Copy';
+  subtitleDialog.value = "Edit the  book copy's information";
+  bookCopyDialog.value = true;
 };
 
-const confirmDelete = (authorToDelete: IAuthor) => {
+const confirmDelete = (bookCopyToDelete: IBookCopy) => {
   try {
-    const { id } = authorToDelete;
-    author.value = authorToDelete;
+    let { id } = bookCopyToDelete;
+    if (!id) id = -1;
+    bookCopy.value = bookCopyToDelete;
     confirm.require({
-      message: t('components.authorTable.messageDelete'),
-      header: t('components.authorTable.headerDelete'),
+      message: 'Do you want to delete this book copy?',
+      header: 'Delete book copy',
       icon: 'pi pi-info-circle',
-      rejectLabel: t('components.authorTable.cancel'),
-      acceptLabel: t('components.authorTable.delete'),
+      rejectLabel: 'Cancel',
+      acceptLabel: 'Delete',
       rejectClass: 'p-button-secondary',
       acceptClass: 'p-button-danger',
       accept: async () => {
-        await authorService.delete(id);
+        await bookCopyService.delete(id);
         toast.add({
           severity: 'success',
-          summary: t('components.authorTable.summaryDeleted'),
-          detail: t('components.authorTable.detailDeleted'),
+          summary: 'Deleted',
+          detail: 'The book copy was deleted',
           life: 3000,
         });
       },
       reject: () => {
         toast.add({
           severity: 'error',
-          summary: t('components.authorTable.summaryCanceled'),
-          detail: t('components.authorTable.detailCanceled'),
+          summary: 'Canceled',
+          detail: 'The operation was canceled',
           life: 3000,
         });
       },
     });
   } catch (error) {
-    let errorMessage = t('components.authorTable.unknowError');
+    let errorMessage = 'An unknown error has ocurred';
     if (error instanceof Error) {
       errorMessage = error.message;
     }
@@ -258,25 +242,21 @@ const confirmDelete = (authorToDelete: IAuthor) => {
 };
 
 const hideDialog = () => {
-  authorDialog.value = false;
-  author.value = {};
-  name.value = '';
-  lastName.value = '';
-
+  bookCopyDialog.value = false;
+  bookCopy.value = {};
+  book.value = {};
   toUpdate.value = false;
 };
 
 onMounted(async () => {
-  await authorService.fetchAll();
-  canManage.value = await authorService.canManage();
+  await bookCopyService.fetchAll();
+  await bookService.fetchAll();
+  canManage.value = await bookCopyService.canManage();
   loading.value = false;
 });
 
 const handleError = (error: string): string => {
-  if (error.includes('name should not be empty'))
-    return t('components.authorTable.errorName');
-  if (error.includes('lastName should not be empty'))
-    return t('components.authorTable.errorLastName');
+  if (error.includes('id should not be empty')) return 'id should not be empty';
 
   return error;
 };
@@ -320,7 +300,6 @@ button {
 .align-items-center {
   justify-content: space-between;
 }
-
 .big-loading {
   height: 65vh;
   text-align: center;

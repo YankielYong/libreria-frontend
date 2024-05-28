@@ -25,13 +25,13 @@
         <template #header>
           <div class="flex justify-content-between">
             <IconField iconPosition="left">
-              <InputIcon>
+              <InputIcon style="margin-top: -0.7rem">
                 <i class="pi pi-search" />
               </InputIcon>
               <InputText
                 v-model="filters['global'].value"
                 placeholder="Keyword Search"
-                :pt="{ root: { class: 'my-inputtext' } }"
+                :pt="{ root: { style: 'margin-top: 0.2rem' } }"
               />
             </IconField>
             <Button
@@ -118,7 +118,10 @@
             optionLabel="name"
             placeholder="Select a Role"
             class="w-full md:w-14rem"
-            :pt="{ list: { style: 'padding: 0; margin-bottom: 0' } }"
+            :pt="{
+              list: { style: 'padding: 0; margin-bottom: 0' },
+              input: { style: 'width: 12.5rem' },
+            }"
           />
         </div>
         <div class="flex justify-content-end gap-2">
@@ -361,16 +364,8 @@ button {
   padding-right: 12px !important;
 }
 
-:deep(.p-dropdown-label) {
-  width: 12.5rem;
-}
-
 :deep(ul) {
   padding-left: 0 !important;
-}
-
-.my-inputtext {
-  margin-top: 0.2rem;
 }
 
 .big-loading {

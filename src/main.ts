@@ -4,8 +4,10 @@ import 'bootstrap';
 
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
+import { createI18n } from 'vue-i18n';
 import App from './App.vue';
 import router from './router';
+import { messages } from './i18n/messages';
 
 // Importaciones de PrimeVue
 import PrimeVue from 'primevue/config';
@@ -29,14 +31,23 @@ import DataView from 'primevue/dataview';
 import InputNumber from 'primevue/inputnumber';
 import Textarea from 'primevue/textarea';
 import MultiSelect from 'primevue/multiselect';
+import Calendar from 'primevue/calendar';
 import 'primevue/resources/themes/lara-light-green/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 
 const app = createApp(App);
 
+const i18n = createI18n({
+  legacy: false,
+  locale: 'English',
+  fallbackLocale: 'English',
+  messages,
+});
+
 app.use(createPinia());
 app.use(router);
+app.use(i18n);
 app.use(PrimeVue);
 app.use(ToastService);
 app.use(ConfirmationService);
@@ -58,5 +69,6 @@ app.component('DataView', DataView);
 app.component('InputNumber', InputNumber);
 app.component('Textarea', Textarea);
 app.component('MultiSelect', MultiSelect);
+app.component('Calendar', Calendar);
 
 app.mount('#app');

@@ -1,86 +1,97 @@
-import { AuthorDto } from '@/dto/AuthorDto';
-import type { IAuthor } from '@/interfaces/IAuthor';
+import type { SanctionDto } from '@/dto/SanctionDto';
+import type { ISanction } from '@/interfaces/ISanction';
+import type { IUser } from '@/interfaces/IUser';
 import useAuthStore from '@/store/auth';
 import { Configuration } from '@/util/enum/Configuration';
-import { ref } from 'vue';
-import type { Ref } from 'vue';
+import { ref, type Ref } from 'vue';
 
-class AuthorService {
-  private authors: Ref<Array<IAuthor>>;
+class SanctionService {
+  private sanctions: Ref<Array<ISanction>>;
 
   private readonly store = useAuthStore();
 
   constructor() {
-    this.authors = ref<Array<IAuthor>>([]);
+    this.sanctions = ref<Array<ISanction>>([]);
   }
 
-  getAuthors(): Ref<Array<IAuthor>> {
-    return this.authors;
+  getSanctions(): Ref<Array<IUser>> {
+    return this.sanctions;
   }
 
   async fetchAll(): Promise<void> {
     try {
-      const url = `${Configuration.BACKEND_HOST}/author`;
+      const token = this.store.token;
+      const url = `${Configuration.BACKEND_HOST}/sanction`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const json = await response.json();
 
-      this.authors.value = await json;
+      this.sanctions.value = await json;
     } catch (error) {
       console.log(error);
     }
   }
 
-  async create(author: AuthorDto): Promise<void> {
+  async create(sanction: SanctionDto): Promise<void> {
     try {
+      const { user, ...details } = sanction;
+      const userId = user.id;
       const token = this.store.token;
-      const res = await fetch(`${Configuration.BACKEND_HOST}/author`, {
+      const res = await fetch(`${Configuration.BACKEND_HOST}/sanction`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(author),
+        body: JSON.stringify({
+          user: userId,
+          ...details,
+        }),
       });
       const response = await res.json();
       if ('error' in response) {
         throw new Error(response.message);
       }
       const { id } = response;
-      this.authors.value.push({ id, ...author });
+      this.sanctions.value.push({ id, user, ...details });
     } catch (error) {
       console.log(error);
       throw new Error(`failed: ${error}`);
     }
   }
 
-  async update(author: IAuthor): Promise<void> {
+  async update(book: ISanction): Promise<void> {
     try {
       const token = this.store.token;
-      const { id, ...details } = author;
-      const res = await fetch(`${Configuration.BACKEND_HOST}/author/${id}`, {
+      const { id, user, ...details } = book;
+      const userId = user?.id;
+      const res = await fetch(`${Configuration.BACKEND_HOST}/sanction/${id}`, {
         method: 'PATCH',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(details),
+        body: JSON.stringify({
+          ...details,
+          user: userId,
+        }),
       });
       const response = await res.json();
       if ('error' in response) {
         throw new Error(response.message);
       }
-      const index = this.authors.value.findIndex((a) => a.id === id);
+      const index = this.sanctions.value.findIndex((s) => s.id === id);
       if (index !== -1) {
-        this.authors.value[index] = { id, ...details };
+        this.sanctions.value[index] = { id, user, ...details };
       }
     } catch (error) {
       console.log(error);
@@ -88,10 +99,10 @@ class AuthorService {
     }
   }
 
-  async delete(id: number | undefined): Promise<void> {
+  async delete(id: number): Promise<void> {
     try {
       const token = this.store.token;
-      const res = await fetch(`${Configuration.BACKEND_HOST}/author/${id}`, {
+      const res = await fetch(`${Configuration.BACKEND_HOST}/sanction/${id}`, {
         method: 'DELETE',
         headers: {
           Accept: 'application/json',
@@ -103,8 +114,8 @@ class AuthorService {
       if ('error' in response) {
         throw new Error(response.message);
       }
-      this.authors.value = this.authors.value.filter(
-        (author) => author.id !== id
+      this.sanctions.value = this.sanctions.value.filter(
+        (sanction) => sanction.id !== id
       );
     } catch (error) {
       console.log(error);
@@ -120,4 +131,4 @@ class AuthorService {
   }
 }
 
-export default AuthorService;
+export default SanctionService;
