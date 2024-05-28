@@ -30,21 +30,29 @@
               </InputIcon>
               <InputText
                 v-model="filters['global'].value"
-                placeholder="Keyword Search"
+                :placeholder="t('components.authorTable.keywordSearch')"
                 :pt="{ root: { style: 'margin-top: 0.2rem' } }"
               />
             </IconField>
             <Button
               v-if="canManage"
-              label="New"
+              :label="t('components.authorTable.new')"
               icon="pi pi-plus"
               class="mr-2"
               @click="openNew"
             />
           </div>
         </template>
-        <Column field="name" header="Name" sortable></Column>
-        <Column field="lastName" header="Last Name" :sortable="true"></Column>
+        <Column
+          field="name"
+          :header="t('components.authorTable.name')"
+          sortable
+        ></Column>
+        <Column
+          field="lastName"
+          :header="t('components.authorTable.lastName')"
+          :sortable="true"
+        ></Column>
         <Column v-if="canManage" style="width: 144px">
           <template #body="slotProps">
             <Button
@@ -69,7 +77,9 @@
       >
         <p class="p-text-secondary block mb-5">{{ subtitleDialog }}</p>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="name" class="font-semibold w-6rem">Name</label>
+          <label for="name" class="font-semibold w-6rem">{{
+            t('components.authorTable.name')
+          }}</label>
           <InputText
             id="name"
             v-model="name"
@@ -78,7 +88,9 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-5">
-          <label for="lastname" class="font-semibold w-6rem">Last Name</label>
+          <label for="lastname" class="font-semibold w-6rem">{{
+            t('components.authorTable.lastName')
+          }}</label>
           <InputText
             id="lastname"
             v-model="lastName"
@@ -89,7 +101,7 @@
         <div class="flex justify-content-end gap-2">
           <Button
             type="button"
-            label="Cancel"
+            :label="t('components.authorTable.cancel')"
             severity="danger"
             @click="hideDialog"
             :pt="{ root: { style: 'width: 30%' } }"
@@ -98,7 +110,7 @@
             type="button"
             :label="labelSaveButton"
             @click="saveAuthor"
-            :pt="{ root: { style: 'width: 35%' } }"
+            :pt="{ root: { style: 'width: 40%' } }"
           ></Button>
         </div>
       </Dialog>
@@ -111,11 +123,13 @@ import { FilterMatchMode } from 'primevue/api';
 import { onMounted, ref, type Ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
+import { useI18n } from 'vue-i18n';
 import AuthorService from '@/services/AuthorService';
 import type { IAuthor } from '@/interfaces/IAuthor';
 
 const toast = useToast();
 const confirm = useConfirm();
+const { t } = useI18n();
 
 const authorService = new AuthorService();
 const authors = authorService.getAuthors();
@@ -130,7 +144,8 @@ const authorToUpdate = ref();
 const authorDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
-const labelSaveButton = ref('Save');
+const labelSaveButton = ref('');
+labelSaveButton.value = t('components.authorTable.save');
 const toUpdate = ref(false);
 
 const loading = ref(true);
@@ -143,12 +158,12 @@ const saveAuthor = async () => {
     lastName: lastName.value,
   };
   try {
-    labelSaveButton.value = 'Saving...';
+    labelSaveButton.value = t('components.authorTable.saving');
     if (toUpdate.value) {
       await authorService.update(authorToUpdate.value);
       toast.add({
         severity: 'success',
-        summary: 'Author updated successfully',
+        summary: t('components.authorTable.authorUpdated'),
         life: 3000,
       });
       hideDialog();
@@ -157,13 +172,13 @@ const saveAuthor = async () => {
       await authorService.create(authorToUpdate.value);
       toast.add({
         severity: 'success',
-        summary: 'Author created successfully',
+        summary: t('components.authorTable.authorCreated'),
         life: 3000,
       });
       hideDialog();
     }
   } catch (error) {
-    let errorMessage = 'An unknown error has ocurred';
+    let errorMessage = t('components.authorTable.unknowError');
     if (error instanceof Error) {
       errorMessage = handleError(error.message);
     }
@@ -173,7 +188,7 @@ const saveAuthor = async () => {
       life: 3000,
     });
   }
-  labelSaveButton.value = 'Save';
+  labelSaveButton.value = t('components.authorTable.save');
 };
 
 const openNew = () => {
@@ -181,8 +196,8 @@ const openNew = () => {
   name.value = '';
   lastName.value = '';
 
-  titleDialog.value = 'New Author';
-  subtitleDialog.value = "Enter the author's information";
+  titleDialog.value = t('components.authorTable.newAuthorTitle');
+  subtitleDialog.value = t('components.authorTable.newAuthorSubtitle');
   toUpdate.value = false;
   authorDialog.value = true;
 };
@@ -194,44 +209,43 @@ const editAuthor = (authorToEdit: IAuthor) => {
   lastName.value = author.value.lastName;
   toUpdate.value = true;
 
-  titleDialog.value = 'Edit Author';
-  subtitleDialog.value = "Edit the author's information";
+  titleDialog.value = t('components.authorTable.editAuthorTitle');
+  subtitleDialog.value = t('components.authorTable.editAuthorSubtitle');
   authorDialog.value = true;
 };
 
 const confirmDelete = (authorToDelete: IAuthor) => {
   try {
-    let { id } = authorToDelete;
-    if (!id) id = -1;
+    const { id } = authorToDelete;
     author.value = authorToDelete;
     confirm.require({
-      message: 'Do you want to delete this author?',
-      header: 'Delete author',
+      message: t('components.authorTable.messageDelete'),
+      header: t('components.authorTable.headerDelete'),
       icon: 'pi pi-info-circle',
-      rejectLabel: 'Cancel',
-      acceptLabel: 'Delete',
+      rejectLabel: t('components.authorTable.cancel'),
+      acceptLabel: t('components.authorTable.delete'),
       rejectClass: 'p-button-secondary',
       acceptClass: 'p-button-danger',
       accept: async () => {
         await authorService.delete(id);
         toast.add({
           severity: 'success',
-          summary: 'Deleted',
-          detail: 'The author was deleted',
+          summary: t('components.authorTable.summaryDeleted'),
+          detail: t('components.authorTable.detailDeleted'),
           life: 3000,
         });
       },
       reject: () => {
         toast.add({
           severity: 'error',
-          summary: 'Canceled',
-          detail: 'The operation was canceled',
+          summary: t('components.authorTable.summaryCanceled'),
+          detail: t('components.authorTable.detailCanceled'),
           life: 3000,
         });
       },
     });
   } catch (error) {
-    let errorMessage = 'An unknown error has ocurred';
+    let errorMessage = t('components.authorTable.unknowError');
     if (error instanceof Error) {
       errorMessage = error.message;
     }
@@ -260,9 +274,9 @@ onMounted(async () => {
 
 const handleError = (error: string): string => {
   if (error.includes('name should not be empty'))
-    return 'Name should not be empty';
+    return t('components.authorTable.errorName');
   if (error.includes('lastName should not be empty'))
-    return 'Last name should not be empty';
+    return t('components.authorTable.errorLastName');
 
   return error;
 };

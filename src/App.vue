@@ -1,23 +1,49 @@
 <template>
   <nav class="navbar">
     <ul class="nav-links">
-      <li><router-link to="/" class="nav-item">Home</router-link></li>
+      <li>
+        <router-link to="/" class="nav-item">{{
+          $t('views.home.nav.home')
+        }}</router-link>
+      </li>
       <li>
         <router-link to="/auth/signin" class="nav-item">Sign In</router-link>
       </li>
-      <li><router-link to="/book" class="nav-item">Books</router-link></li>
-      <li><router-link to="/author" class="nav-item">Authors</router-link></li>
       <li>
-        <router-link to="/subject" class="nav-item">Subjects</router-link>
+        <router-link to="/book" class="nav-item">{{
+          $t('views.home.nav.books')
+        }}</router-link>
       </li>
       <li>
-        <router-link to="/book-copy" class="nav-item">Book Copies</router-link>
+        <router-link to="/author" class="nav-item">{{
+          $t('views.home.nav.authors')
+        }}</router-link>
       </li>
-      <li><router-link to="/loan" class="nav-item">Loans</router-link></li>
       <li>
-        <router-link to="/sanction" class="nav-item">Sanctions</router-link>
+        <router-link to="/subject" class="nav-item">{{
+          $t('views.home.nav.subjects')
+        }}</router-link>
       </li>
-      <li><router-link to="/user" class="nav-item">Users</router-link></li>
+      <li>
+        <router-link to="/book-copy" class="nav-item">{{
+          $t('views.home.nav.bookCopy')
+        }}</router-link>
+      </li>
+      <li>
+        <router-link to="/loan" class="nav-item">{{
+          $t('views.home.nav.loans')
+        }}</router-link>
+      </li>
+      <li>
+        <router-link to="/sanction" class="nav-item">{{
+          $t('views.home.nav.sanctions')
+        }}</router-link>
+      </li>
+      <li>
+        <router-link to="/user" class="nav-item">{{
+          $t('views.home.nav.users')
+        }}</router-link>
+      </li>
     </ul>
     <div>
       <select v-model="$i18n.locale">

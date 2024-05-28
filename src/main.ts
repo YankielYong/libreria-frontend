@@ -39,6 +39,7 @@ import 'primeicons/primeicons.css';
 const app = createApp(App);
 
 const i18n = createI18n({
+  legacy: false,
   locale: 'English',
   fallbackLocale: 'English',
   messages,
