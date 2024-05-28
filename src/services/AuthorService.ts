@@ -88,7 +88,7 @@ class AuthorService {
     }
   }
 
-  async delete(id: number): Promise<void> {
+  async delete(id: number | undefined): Promise<void> {
     try {
       const token = this.store.token;
       const res = await fetch(`${Configuration.BACKEND_HOST}/author/${id}`, {
