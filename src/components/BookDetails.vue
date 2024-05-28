@@ -2,9 +2,15 @@
   <div class="card">
     <Toast position="top-right" style="width: 50%" />
     <ConfirmDialog></ConfirmDialog>
+    <i
+      v-if="loading"
+      class="pi pi-spin pi-spinner big-loading"
+      style="font-size: 5rem; color: #10b981"
+    ></i>
     <DataView
       :value="books"
       paginator
+      v-if="!loading"
       :rows="5"
       dataKey="'id'"
       :sortOrder="sortOrder"
@@ -152,7 +158,10 @@
           optionLabel="name"
           placeholder="Select a Country"
           class="w-full md:w-14rem"
-          :pt="{ list: { style: 'padding: 0; margin-bottom: 0' } }"
+          :pt="{
+            list: { style: 'padding: 0; margin-bottom: 0' },
+            input: { style: 'width: 12.5rem' },
+          }"
         />
       </div>
       <div class="my-flex align-items-center gap-3 mb-3">
@@ -174,7 +183,10 @@
           optionLabel="name"
           placeholder="Select a Subject"
           class="w-full md:w-14rem"
-          :pt="{ list: { style: 'padding: 0; margin-bottom: 0' } }"
+          :pt="{
+            list: { style: 'padding: 0; margin-bottom: 0' },
+            input: { style: 'width: 12.5rem' },
+          }"
         />
       </div>
       <div class="my-flex align-items-center gap-3 mb-5">
@@ -200,7 +212,7 @@
         <Button
           type="button"
           :label="labelSaveButton"
-          @click="saveUser"
+          @click="saveBook"
           :pt="{ root: { style: 'width: 35%' } }"
         ></Button>
       </div>
@@ -277,7 +289,7 @@ const onSortChange = (event: { value: { value: any } }) => {
   }
 };
 
-const saveUser = async () => {
+const saveBook = async () => {
   bookToUpdate.value = {
     id: book.value.id,
     title: title.value,
@@ -516,7 +528,6 @@ const formatAuthorsName = (author: IAuthor) =>
   align-content: center;
 }
 
-:deep(.p-dropdown-label),
 :deep(.p-multiselect-label) {
   width: 12.5rem;
   max-width: 12.5rem;

@@ -25,12 +25,13 @@
         <template #header>
           <div class="flex justify-content-between">
             <IconField iconPosition="left">
-              <InputIcon>
+              <InputIcon style="margin-top: -0.7rem">
                 <i class="pi pi-search" />
               </InputIcon>
               <InputText
                 v-model="filters['global'].value"
                 placeholder="Keyword Search"
+                :pt="{ root: { style: 'margin-top: 0.2rem' } }"
               />
             </IconField>
             <Button
@@ -289,9 +290,6 @@ initFilters();
   border-color: #e5e7eb !important;
   border-style: solid !important;
   border: 1px solid;
-}
-:deep(.p-input-icon) {
-  margin-top: -0.7rem !important;
 }
 :deep(.flex) {
   display: flex !important;

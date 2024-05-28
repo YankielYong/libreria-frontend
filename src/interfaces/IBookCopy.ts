@@ -1,3 +1,7 @@
+import type { IBook } from './IBook';
+
 export interface IBookCopy {
-    id?: number;
+  id?: number;
+  book?: IBook;
+  available?: boolean;
 }

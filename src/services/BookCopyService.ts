@@ -7,31 +7,42 @@ import type { Ref } from 'vue';
 
 class BookCopyService {
   private bookCopies: Ref<Array<IBookCopy>>;
+  private availables: Ref<Array<IBookCopy>>;
 
   private readonly store = useAuthStore();
 
   constructor() {
     this.bookCopies = ref<Array<IBookCopy>>([]);
+    this.availables = ref<Array<IBookCopy>>([]);
   }
 
   getBookCopies(): Ref<Array<IBookCopy>> {
     return this.bookCopies;
   }
 
+  getAvailables() {
+    return this.availables;
+  }
+
   async fetchAll(): Promise<void> {
     try {
-      const url = `${Configuration.BACKEND_HOST}/bookCopy`;
+      const token = this.store.token;
+      const url = `${Configuration.BACKEND_HOST}/book-copy`;
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
 
       const json = await response.json();
 
       this.bookCopies.value = await json;
+      this.availables.value = this.bookCopies.value.filter(
+        (b) => b.available === true
+      );
     } catch (error) {
       console.log(error);
     }
@@ -39,22 +50,24 @@ class BookCopyService {
 
   async create(bookCopy: BookCopyDto): Promise<void> {
     try {
+      const { book } = bookCopy;
+      const bookId = book.id;
       const token = this.store.token;
-      const res = await fetch(`${Configuration.BACKEND_HOST}/bookCopy`, {
+      const res = await fetch(`${Configuration.BACKEND_HOST}/book-copy`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(bookCopy),
+        body: JSON.stringify({ book: bookId }),
       });
       const response = await res.json();
       if ('error' in response) {
         throw new Error(response.message);
       }
       const { id } = response;
-      this.bookCopies.value.push({  ...bookCopy });
+      this.bookCopies.value.push({ id, book });
     } catch (error) {
       console.log(error);
       throw new Error(`failed: ${error}`);
@@ -64,15 +77,16 @@ class BookCopyService {
   async update(bookCopy: IBookCopy): Promise<void> {
     try {
       const token = this.store.token;
-      const { id, ...details } = bookCopy;
-      const res = await fetch(`${Configuration.BACKEND_HOST}/bookCopy/${id}`, {
+      const { id, book } = bookCopy;
+      const bookId = book?.id;
+      const res = await fetch(`${Configuration.BACKEND_HOST}/book-copy/${id}`, {
         method: 'PATCH',
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(details),
+        body: JSON.stringify({ book: bookId }),
       });
       const response = await res.json();
       if ('error' in response) {
@@ -80,7 +94,7 @@ class BookCopyService {
       }
       const index = this.bookCopies.value.findIndex((b) => b.id === id);
       if (index !== -1) {
-        this.bookCopies.value[index] = { id, ...details };
+        this.bookCopies.value[index] = { id, book };
       }
     } catch (error) {
       console.log(error);
@@ -91,7 +105,7 @@ class BookCopyService {
   async delete(id: number): Promise<void> {
     try {
       const token = this.store.token;
-      const res = await fetch(`${Configuration.BACKEND_HOST}/bookCopy/${id}`, {
+      const res = await fetch(`${Configuration.BACKEND_HOST}/book-copy/${id}`, {
         method: 'DELETE',
         headers: {
           Accept: 'application/json',

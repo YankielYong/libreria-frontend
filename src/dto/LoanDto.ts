@@ -1,19 +1,21 @@
+import type { IBookCopy } from '@/interfaces/IBookCopy';
+import type { IUser } from '@/interfaces/IUser';
+
 export class LoanDto {
-    bookCopy?: object;
-    userId?: object;
-    startDate?: string;
-    endDate?: string;
-  
-    constructor(
-    bookCopy?: object,
-    userId?: object,
-    startDate?: string,
-    endDate?: string,
-    ) {
-      this.bookCopy = bookCopy;
-      this.userId = userId;
-      this.startDate = startDate;
-      this.endDate = endDate;
-    }
+  bookCopy?: IBookCopy;
+  user?: IUser;
+  startDate?: Date;
+  endDate?: Date;
+
+  constructor(
+    bookCopy?: IBookCopy,
+    user?: IUser,
+    startDate?: Date,
+    endDate?: Date
+  ) {
+    this.bookCopy = bookCopy;
+    this.user = user;
+    this.startDate = startDate;
+    this.endDate = endDate;
   }
-  
+}

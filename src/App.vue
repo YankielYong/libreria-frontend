@@ -10,6 +10,12 @@
       <li>
         <router-link to="/subject" class="nav-item">Subjects</router-link>
       </li>
+      <li>
+        <router-link to="/book-copy" class="nav-item">Book Copies</router-link>
+      </li>
+      <li>
+        <router-link to="/loan" class="nav-item">Loans</router-link>
+      </li>
       <li><router-link to="/user" class="nav-item">Users</router-link></li>
     </ul>
   </nav>

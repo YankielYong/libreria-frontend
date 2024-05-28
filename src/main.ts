@@ -29,6 +29,7 @@ import DataView from 'primevue/dataview';
 import InputNumber from 'primevue/inputnumber';
 import Textarea from 'primevue/textarea';
 import MultiSelect from 'primevue/multiselect';
+import Calendar from 'primevue/calendar';
 import 'primevue/resources/themes/lara-light-green/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
@@ -58,5 +59,6 @@ app.component('DataView', DataView);
 app.component('InputNumber', InputNumber);
 app.component('Textarea', Textarea);
 app.component('MultiSelect', MultiSelect);
+app.component('Calendar', Calendar);
 
 app.mount('#app');

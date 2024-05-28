@@ -8,6 +8,8 @@ import UserTableView from '@/views/UserTableView.vue';
 import { RoleType } from '@/util/enum/RoleType';
 import SubjectTableView from '@/views/SubjectTableView.vue';
 import BookDetailsView from '@/views/BookDetailsView.vue';
+import LoanTableView from '@/views/LoanTableView.vue';
+import BookCopyTableView from '@/views/BookCopyTableView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,6 +58,22 @@ const router = createRouter({
       path: '/subject',
       name: 'subjectTable',
       component: SubjectTableView,
+      meta: {
+        requireAuth: false,
+      },
+    },
+    {
+      path: '/book-copy',
+      name: 'bookCopyTable',
+      component: BookCopyTableView,
+      meta: {
+        requireAuth: false,
+      },
+    },
+    {
+      path: '/loan',
+      name: 'loanTable',
+      component: LoanTableView,
       meta: {
         requireAuth: false,
       },
