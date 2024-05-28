@@ -1,5 +1,5 @@
 <template>
-  <h1>Index</h1>
+  <h1>{{ $t('views.home.message') }}</h1>
 </template>
 
 <script lang="ts" setup></script>
