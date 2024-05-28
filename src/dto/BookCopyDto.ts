@@ -1,7 +1,9 @@
-export class BookCopyDto{
-    id: number;
-    
-    constructor(id: number) {
-        this.id = id;
-    }
+import type { IBook } from '@/interfaces/IBook';
+
+export class BookCopyDto {
+  book: IBook;
+
+  constructor(book: IBook) {
+    this.book = book;
+  }
 }
