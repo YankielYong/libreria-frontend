@@ -1,23 +1,29 @@
 <template>
      <div class="card">
-     <h3>Books By Subject Report</h3>
-     <h5>In this report you can view the books belonging to any subject you select, as long as it is previously registered.</h5>
-     <div class ="my-flex align-items-center gap-3 mb-3">
+     <h3>{{t('components.booksBySubject.title')}}</h3>
+     <h6><i>{{t('components.booksBySubject.subtitle')}}</i></h6>
+     <div class ="align-items-center gap-3 mb-3">
 
-        <label for="subject" class="font-semibold w-6rem">Subject</label>
+        
         <Dropdown
           v-model="subject"
           filter
           :options="subjects"
           optionLabel="name"
-          placeholder="Select a Subject"
+          :placeholder="t('components.booksBySubject.errorSubject')"
           class="w-full md:w-14rem"
           :pt="{
+            root: { style: 'margin-right: 1rem' },
             list: { style: 'padding: 0; margin-bottom: 0' },
             input: { style: 'width: 12.5rem' },
           }"
         />
-     
+        <Button
+            type="button"
+            :label="t('components.booksBySubject.labelExport')"
+            @click="createReport"
+            :pt="{ root: { style: 'width: 10rem' } }"
+          ></Button>
     </div>
     </div>
 </template>
@@ -25,23 +31,41 @@
 <script lang="ts" setup>
 import type { ISubject } from '@/interfaces/ISubject';
 import SubjectService from '@/services/SubjectService';
-import router from '@/router';
-import { getCurrentInstance, onMounted, ref, type Ref } from 'vue';
+import ReportService from '@/services/ReportsService';
+import { defineEmits, onMounted, ref, type Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const emit = defineEmits(['error'])
+const {t} = useI18n();
 
 const subject: Ref<ISubject> = ref({});
 const subjectService = new SubjectService();
-const subjects = ref(subjectService.getSubjects());
+const subjects = subjectService.getSubjects();
+const reportService = new ReportService();
+
+const createReport  = async () => {
+  const name = subject.value.name || '';
+  if(name === ''){
+    emit('error', t('components.booksBySubject.errorSubject'))
+  }
+  else{await reportService.fetchBySubject(name)}
+  
+}
+onMounted(async () => {
+  await subjectService.fetchAll();
+})
 </script>
 <style scoped>
 
 .card {
-  border: none;
+  padding: 1rem;
+ border: none;
+ border-bottom: 1px solid #d8d7d7;
+ margin-bottom: 1rem;
 }
-.my-flex {
-  display: flex !important;
-}
-.align-items-center {
-  justify-content: space-between;
+
+h6{
+  margin: 1rem 0 1.5rem 0;
 }
 
 </style>

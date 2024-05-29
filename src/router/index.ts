@@ -11,6 +11,7 @@ import BookDetailsView from '@/views/BookDetailsView.vue';
 import LoanTableView from '@/views/LoanTableView.vue';
 import BookCopyTableView from '@/views/BookCopyTableView.vue';
 import SanctionTableView from '@/views/SanctionTableView.vue';
+import ReportsView from '@/views/ReportsView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -91,6 +92,17 @@ const router = createRouter({
       path: '/user',
       name: 'userTable',
       component: UserTableView,
+      meta: {
+        requireAuth: true,
+        restringed: true,
+        admin: true,
+        librarian: false,
+      },
+    },
+    {
+      path: '/reports',
+      name: 'reports',
+      component: ReportsView,
       meta: {
         requireAuth: true,
         restringed: true,

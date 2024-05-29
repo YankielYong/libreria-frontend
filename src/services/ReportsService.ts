@@ -24,7 +24,7 @@ class ReportsService {
     }
   }
 
-  async fetchByAuthor(author: string): Promise<void> {
+  async fetchByAuthor(id: number): Promise<void> {
     try {
       const url = `${Configuration.BACKEND_HOST}/report/author/`;
       const response = await fetch(url, {
