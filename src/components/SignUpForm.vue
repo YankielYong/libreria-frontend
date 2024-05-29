@@ -9,7 +9,7 @@
             v-model="email"
             :pt="{ root: { class: 'my-input' } }"
           />
-          <label for="email">Email Adress</label>
+          <label for="email">{{ t('components.auth.email') }}</label>
         </FloatLabel>
       </div>
 
@@ -20,7 +20,7 @@
             v-model="name"
             :pt="{ root: { class: 'my-input' } }"
           />
-          <label for="name">Name</label>
+          <label for="name">{{ t('components.auth.name') }}</label>
         </FloatLabel>
       </div>
 
@@ -31,7 +31,7 @@
             v-model="lastName"
             :pt="{ root: { class: 'my-input' } }"
           />
-          <label for="lastname">Last Name</label>
+          <label for="lastname">{{ t('components.auth.lastName') }}</label>
         </FloatLabel>
       </div>
 
@@ -42,7 +42,7 @@
             v-model="dni"
             :pt="{ root: { class: 'my-input' } }"
           />
-          <label for="dni">DNI</label>
+          <label for="dni">{{ t('components.auth.dni') }}</label>
         </FloatLabel>
       </div>
 
@@ -50,22 +50,22 @@
         <FloatLabel>
           <Password v-model="password" inputId="pwd" toggleMask>
             <template #header>
-              <h6>Pick a password</h6>
+              <h6>{{ t('components.auth.pickPassword') }}</h6>
             </template>
             <template #footer>
               <Divider />
-              <p class="mt-2">Suggestions</p>
+              <p class="mt-2">{{ t('components.auth.sugg') }}</p>
               <ul class="pl-2 ml-2 mt-0" style="line-height: 1.5">
-                <li>Minimum 8 characters</li>
+                <li>{{ t('components.auth.minPassw') }}</li>
               </ul>
             </template>
           </Password>
-          <label for="pwd">Password</label>
+          <label for="pwd">{{ t('components.auth.password') }}</label>
         </FloatLabel>
       </div>
 
       <Button
-        label="Sign Up"
+        :label="t('components.auth.signup')"
         raised
         v-if="!loading"
         @click="signUp"
@@ -84,12 +84,15 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
+import { useI18n } from 'vue-i18n';
 import router from '@/router';
 import { UserDto } from '@/dto/UserDto';
 import useAuthStore from '@/store/auth';
 
 const store = useAuthStore();
 const toast = useToast();
+const { t } = useI18n();
+
 const loading = ref(false);
 
 let email = ref('');
@@ -100,6 +103,7 @@ let password = ref('');
 
 const signUp = async () => {
   const user: UserDto = new UserDto(
+    0,
     email.value,
     password.value,
     name.value,
@@ -113,31 +117,32 @@ const signUp = async () => {
   } else {
     let error = store.error;
     if (error.includes('email should not be empty'))
-      error = 'Email should not be empty';
+      error = t('components.auth.errorEmailEmpty');
     if (error.includes('name should not be empty'))
-      error = 'Name should not be empty';
+      error = t('components.auth.errorNameEmpty');
     if (error.includes('lastName should not be empty'))
-      error = 'Last name should not be empty';
+      error = t('components.auth.errorLastNameEmpty');
     else if (error.includes('password should not be empty'))
-      error = 'Password should not be empty';
+      error = t('components.auth.errorPasswordEmpty');
     else if (
       error.includes('dni must be longer than or equal to 11 characters')
     )
-      error = 'DNI must have 11 digits';
+      error = t('components.auth.errorDniLength');
     else if (error.includes('dni must be a number string'))
-      error = 'DNI must have only digits';
+      error = t('components.auth.errorDniFormat');
     else if (error.includes('email must be an email'))
-      error = 'Email not valid';
+      error = t('components.auth.errorInvalidEmail');
     else if (
       error.includes('password must be longer than or equal to 8 characters')
     )
-      error = 'Password must be longer than or equal to 8 characters';
-    else if (error.includes('Invalid dni')) error = 'DNI not valid';
+      error = t('components.auth.errorPasswordLength');
+    else if (error.includes('Invalid dni'))
+      error = t('components.auth.errorInvalidDni');
     else if (error.includes('Ya existe la llave (dni)'))
-      error = 'DNI already exists';
+      error = t('components.auth.errorDniExists');
     toast.add({
       severity: 'error',
-      summary: 'Login Failed',
+      summary: t('components.auth.failLogin'),
       detail: error,
       life: 3000,
     });

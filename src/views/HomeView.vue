@@ -1,27 +1,26 @@
 <template>
-    <div class="home">
-      <TextChanger />
-      <header>
-        <h1 class="header-title">Welcome to the library</h1>
-        <p class="header-subtitle">"chapter by chapter"</p>
-      </header>
-    </div>
+  <div class="home">
+    <TextChanger />
+    <header>
+      <h1 class="header-title">{{ $t('views.home.welcome') }}</h1>
+      <p class="header-subtitle">"Chapter By Chapter"</p>
+    </header>
+  </div>
 </template>
-  
-  
-<script lang="ts" setup> 
+
+<script lang="ts" setup>
+import TextChanger from '@/components/TextChanger.vue';
 </script>
 
 <style scoped>
-  .home {
+.home {
   background-image: url('@/assets/image.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  min-height: 100vh;
+  min-height: 95vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   text-align: center;
   color: white;
@@ -53,6 +52,7 @@
 }
 
 header {
+  margin-top: 8rem;
   background-color: rgba(0, 0, 0, 0.5);
   padding: 20px;
   border-radius: 10px;
@@ -85,4 +85,3 @@ header {
   background-color: #ff4500;
 }
 </style>
-  

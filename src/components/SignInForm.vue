@@ -9,7 +9,7 @@
             v-model="email"
             :pt="{ root: { class: 'my-input' } }"
           />
-          <label for="email">Email</label>
+          <label for="email">{{ t('components.auth.email') }}</label>
         </FloatLabel>
       </div>
 
@@ -21,12 +21,12 @@
             :feedback="false"
             toggleMask
           />
-          <label for="pwd">Password</label>
+          <label for="pwd">{{ t('components.auth.password') }}</label>
         </FloatLabel>
       </div>
 
       <Button
-        label="Sign In"
+        :label="t('components.auth.signin')"
         raised
         v-if="!loading"
         @click="signIn"
@@ -34,7 +34,7 @@
       />
       <div v-if="!loading">
         <router-link class="register-p" :to="{ name: 'signup' }">
-          Don't have an account? Sign Up
+          {{ t('components.auth.noAccount') }}
         </router-link>
       </div>
       <i
@@ -49,11 +49,13 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
-import router from '@/router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/store/auth';
+import router from '@/router';
 
 const store = useAuthStore();
 const toast = useToast();
+const { t } = useI18n();
 
 let email = ref('');
 let password = ref('');
@@ -68,15 +70,17 @@ const signIn = async () => {
   } else {
     let error = store.error;
     if (error.includes('email should not be empty'))
-      error = 'Email should not be empty';
+      error = t('components.auth.errorEmailEmpty');
     else if (error.includes('password should not be empty'))
-      error = 'Password should not be empty';
+      error = t('components.auth.errorPasswordEmpty');
     else if (error.includes('email must be an email'))
-      error = 'Email not valid';
+      error = t('components.auth.errorEmailIncorrect');
+    else if (error.includes('Password is wrong'))
+      error = t('components.auth.errorPasswordIncorrect');
     else if (
       error.includes('password must be longer than or equal to 8 characters')
     )
-      error = 'Password must be longer than or equal to 8 characters';
+      error = t('components.auth.errorEmailIncorrect');
     toast.add({
       severity: 'error',
       summary: 'Login Failed',

@@ -219,7 +219,7 @@
           :label="t('components.general.cancel')"
           severity="danger"
           @click="hideDialog"
-          :pt="{ root: { style: 'width: 30%' } }"
+          :pt="{ root: { style: 'width: 35%' } }"
         ></Button>
         <Button
           type="button"
@@ -238,7 +238,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import BookService from '@/services/BookService';
 import type { IBook } from '@/interfaces/IBook';
-import { onMounted, ref, type Ref } from 'vue';
+import { onMounted, ref, watchEffect, type Ref } from 'vue';
 import { Countries } from '@/util/enum/Country';
 import type { ISubject } from '@/interfaces/ISubject';
 import type { IAuthor } from '@/interfaces/IAuthor';
@@ -460,6 +460,10 @@ onMounted(async () => {
   await authorService.fetchAll();
   canManage.value = await bookService.canManage();
   loading.value = false;
+});
+
+watchEffect(() => {
+  labelSaveButton.value = t('components.general.save');
 });
 
 const handleError = (error: string): string[] => {

@@ -123,6 +123,33 @@ class SanctionService {
     }
   }
 
+  async desactivate(idO: number): Promise<void> {
+    try {
+      const sanction = this.sanctions.value.filter((s) => s.id === idO)[0];
+      const { id, isActive, ...details } = sanction;
+      const token = this.store.token;
+      const res = await fetch(`${Configuration.BACKEND_HOST}/sanction/${id}`, {
+        method: 'PATCH',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isActive: false }),
+      });
+      const response = await res.json();
+      if ('error' in response) {
+        throw new Error(response.message);
+      }
+      const index = this.sanctions.value.findIndex((s) => s.id === id);
+      if (index !== -1)
+        this.sanctions.value[index] = { id, isActive: false, ...details };
+    } catch (error) {
+      console.log(error);
+      throw new Error(`failed: ${error}`);
+    }
+  }
+
   async canManage(): Promise<boolean> {
     await this.store.refresh();
     const role = this.store.role;

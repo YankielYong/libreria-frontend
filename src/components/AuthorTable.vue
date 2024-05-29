@@ -104,7 +104,7 @@
             :label="t('components.general.cancel')"
             severity="danger"
             @click="hideDialog"
-            :pt="{ root: { style: 'width: 30%' } }"
+            :pt="{ root: { style: 'width: 35%' } }"
           ></Button>
           <Button
             type="button"
@@ -120,7 +120,7 @@
 
 <script lang="ts" setup>
 import { FilterMatchMode } from 'primevue/api';
-import { onMounted, ref, type Ref } from 'vue';
+import { onMounted, ref, type Ref, watchEffect } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
@@ -144,8 +144,7 @@ const authorToUpdate = ref();
 const authorDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
-const labelSaveButton = ref('');
-labelSaveButton.value = t('components.general.save');
+const labelSaveButton = ref(t('components.general.save'));
 const toUpdate = ref(false);
 
 const loading = ref(true);
@@ -268,6 +267,10 @@ const hideDialog = () => {
   toUpdate.value = false;
 };
 
+watchEffect(() => {
+  labelSaveButton.value = t('components.general.save');
+});
+
 onMounted(async () => {
   await authorService.fetchAll();
   canManage.value = await authorService.canManage();
@@ -281,7 +284,7 @@ const handleError = (error: string): string[] => {
   if (error.includes('lastName should not be empty'))
     errors.push(t('components.authorTable.errorLastName'));
 
-  if(errors.length === 0) errors.push(error);
+  if (errors.length === 0) errors.push(error);
 
   return errors;
 };
