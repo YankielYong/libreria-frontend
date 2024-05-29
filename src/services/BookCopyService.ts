@@ -50,7 +50,7 @@ class BookCopyService {
 
   async create(bookCopy: BookCopyDto): Promise<void> {
     try {
-      const { book } = bookCopy;
+      const { id, book } = bookCopy;
       const bookId = book.id;
       const token = this.store.token;
       const res = await fetch(`${Configuration.BACKEND_HOST}/book-copy`, {
@@ -66,8 +66,8 @@ class BookCopyService {
       if ('error' in response) {
         throw new Error(response.message);
       }
-      const { id } = response;
-      this.bookCopies.value.push({ id, book });
+      bookCopy.id = response.id;
+      this.bookCopies.value.push({ ...bookCopy });
     } catch (error) {
       console.log(error);
       throw new Error(`failed: ${error}`);

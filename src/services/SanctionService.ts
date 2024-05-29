@@ -41,7 +41,7 @@ class SanctionService {
 
   async create(sanction: SanctionDto): Promise<void> {
     try {
-      const { user, ...details } = sanction;
+      const { id, user, ...details } = sanction;
       const userId = user.id;
       const token = this.store.token;
       const res = await fetch(`${Configuration.BACKEND_HOST}/sanction`, {
@@ -60,8 +60,8 @@ class SanctionService {
       if ('error' in response) {
         throw new Error(response.message);
       }
-      const { id } = response;
-      this.sanctions.value.push({ id, user, ...details });
+      sanction.id = response.id;
+      this.sanctions.value.push({ ...sanction });
     } catch (error) {
       console.log(error);
       throw new Error(`failed: ${error}`);

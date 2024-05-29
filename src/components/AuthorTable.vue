@@ -30,13 +30,13 @@
               </InputIcon>
               <InputText
                 v-model="filters['global'].value"
-                :placeholder="t('components.authorTable.keywordSearch')"
+                :placeholder="t('components.general.keywordSearch')"
                 :pt="{ root: { style: 'margin-top: 0.2rem' } }"
               />
             </IconField>
             <Button
               v-if="canManage"
-              :label="t('components.authorTable.new')"
+              :label="t('components.general.new')"
               icon="pi pi-plus"
               class="mr-2"
               @click="openNew"
@@ -101,7 +101,7 @@
         <div class="flex justify-content-end gap-2">
           <Button
             type="button"
-            :label="t('components.authorTable.cancel')"
+            :label="t('components.general.cancel')"
             severity="danger"
             @click="hideDialog"
             :pt="{ root: { style: 'width: 30%' } }"
@@ -145,7 +145,7 @@ const authorDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
 const labelSaveButton = ref('');
-labelSaveButton.value = t('components.authorTable.save');
+labelSaveButton.value = t('components.general.save');
 const toUpdate = ref(false);
 
 const loading = ref(true);
@@ -158,7 +158,7 @@ const saveAuthor = async () => {
     lastName: lastName.value,
   };
   try {
-    labelSaveButton.value = t('components.authorTable.saving');
+    labelSaveButton.value = t('components.general.saving');
     if (toUpdate.value) {
       await authorService.update(authorToUpdate.value);
       toast.add({
@@ -178,17 +178,19 @@ const saveAuthor = async () => {
       hideDialog();
     }
   } catch (error) {
-    let errorMessage = t('components.authorTable.unknowError');
+    let errorMessages = [t('components.general.unknowError')];
     if (error instanceof Error) {
-      errorMessage = handleError(error.message);
+      errorMessages = handleError(error.message);
     }
-    toast.add({
-      severity: 'error',
-      summary: errorMessage,
-      life: 3000,
-    });
+    for (const errorMessage of errorMessages) {
+      toast.add({
+        severity: 'error',
+        summary: errorMessage,
+        life: 3000,
+      });
+    }
   }
-  labelSaveButton.value = t('components.authorTable.save');
+  labelSaveButton.value = t('components.general.save');
 };
 
 const openNew = () => {
@@ -222,15 +224,15 @@ const confirmDelete = (authorToDelete: IAuthor) => {
       message: t('components.authorTable.messageDelete'),
       header: t('components.authorTable.headerDelete'),
       icon: 'pi pi-info-circle',
-      rejectLabel: t('components.authorTable.cancel'),
-      acceptLabel: t('components.authorTable.delete'),
+      rejectLabel: t('components.general.cancel'),
+      acceptLabel: t('components.general.delete'),
       rejectClass: 'p-button-secondary',
       acceptClass: 'p-button-danger',
       accept: async () => {
         await authorService.delete(id);
         toast.add({
           severity: 'success',
-          summary: t('components.authorTable.summaryDeleted'),
+          summary: t('components.general.deleted'),
           detail: t('components.authorTable.detailDeleted'),
           life: 3000,
         });
@@ -238,14 +240,14 @@ const confirmDelete = (authorToDelete: IAuthor) => {
       reject: () => {
         toast.add({
           severity: 'error',
-          summary: t('components.authorTable.summaryCanceled'),
-          detail: t('components.authorTable.detailCanceled'),
+          summary: t('components.general.canceled'),
+          detail: t('components.general.detailCanceled'),
           life: 3000,
         });
       },
     });
   } catch (error) {
-    let errorMessage = t('components.authorTable.unknowError');
+    let errorMessage = t('components.general.unknowError');
     if (error instanceof Error) {
       errorMessage = error.message;
     }
@@ -272,13 +274,16 @@ onMounted(async () => {
   loading.value = false;
 });
 
-const handleError = (error: string): string => {
+const handleError = (error: string): string[] => {
+  let errors = [];
   if (error.includes('name should not be empty'))
-    return t('components.authorTable.errorName');
+    errors.push(t('components.authorTable.errorName'));
   if (error.includes('lastName should not be empty'))
-    return t('components.authorTable.errorLastName');
+    errors.push(t('components.authorTable.errorLastName'));
 
-  return error;
+  if(errors.length === 0) errors.push(error);
+
+  return errors;
 };
 
 const initFilters = () => {

@@ -30,20 +30,28 @@
               </InputIcon>
               <InputText
                 v-model="filters['global'].value"
-                placeholder="Keyword Search"
-                :pt="{ root: { style: 'margin-top: 0.2rem' } }"
+                :placeholder="t('components.general.keywordSearch')"
+                :pt="{
+                  root: {
+                    style: 'margin-top: 0.2rem',
+                  },
+                }"
               />
             </IconField>
             <Button
               v-if="canManage"
-              label="New"
+              :label="t('components.general.new')"
               icon="pi pi-plus"
               class="mr-2"
               @click="openNew"
             />
           </div>
         </template>
-        <Column field="book.title" header="Book" sortable></Column>
+        <Column
+          field="book.title"
+          :header="t('components.bookCopyTable.book')"
+          sortable
+        ></Column>
 
         <Column v-if="canManage" style="width: 144px">
           <template #body="slotProps">
@@ -69,13 +77,15 @@
       >
         <p class="p-text-secondary block mb-5">{{ subtitleDialog }}</p>
         <div class="flex align-items-center gap-3 mb-5">
-          <label for="book" class="font-semibold w-6rem">Book</label>
+          <label for="book" class="font-semibold w-6rem">{{
+            t('components.bookCopyTable.book')
+          }}</label>
           <Dropdown
             v-model="book"
             filter
             :options="books"
             optionLabel="title"
-            placeholder="Select a book"
+            :placeholder="t('components.bookCopyTable.bookLabel')"
             class="w-full md:w-14rem"
             :pt="{
               list: { style: 'padding: 0; margin-bottom: 0' },
@@ -86,7 +96,7 @@
         <div class="flex justify-content-end gap-2">
           <Button
             type="button"
-            label="Cancel"
+            :label="t('components.general.cancel')"
             severity="danger"
             @click="hideDialog"
             :pt="{ root: { style: 'width: 30%' } }"
@@ -95,7 +105,7 @@
             type="button"
             :label="labelSaveButton"
             @click="saveBookCopy"
-            :pt="{ root: { style: 'width: 35%' } }"
+            :pt="{ root: { style: 'width: 40%' } }"
           ></Button>
         </div>
       </Dialog>
@@ -108,6 +118,7 @@ import { FilterMatchMode } from 'primevue/api';
 import { onMounted, ref, type Ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
+import { useI18n } from 'vue-i18n';
 import BookCopyService from '@/services/BookCopyService';
 import type { IBookCopy } from '@/interfaces/IBookCopy';
 import BookService from '@/services/BookService';
@@ -115,6 +126,7 @@ import type { IBook } from '@/interfaces/IBook';
 
 const toast = useToast();
 const confirm = useConfirm();
+const { t } = useI18n();
 
 const bookCopyService = new BookCopyService();
 const bookCopies = bookCopyService.getBookCopies();
@@ -131,7 +143,8 @@ const bookCopyToUpdate = ref();
 const bookCopyDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
-const labelSaveButton = ref('Save');
+const labelSaveButton = ref('');
+labelSaveButton.value = t('components.general.save');
 const toUpdate = ref(false);
 
 const loading = ref(true);
@@ -143,12 +156,12 @@ const saveBookCopy = async () => {
     book: book.value,
   };
   try {
-    labelSaveButton.value = 'Saving...';
+    labelSaveButton.value = t('components.general.saving');
     if (toUpdate.value) {
       await bookCopyService.update(bookCopyToUpdate.value);
       toast.add({
         severity: 'success',
-        summary: 'Book copy updated successfully',
+        summary: t('components.bookCopyTable.bookCopyUpdated'),
         life: 3000,
       });
       hideDialog();
@@ -157,13 +170,13 @@ const saveBookCopy = async () => {
       await bookCopyService.create(bookCopyToUpdate.value);
       toast.add({
         severity: 'success',
-        summary: 'Book copy created successfully',
+        summary: t('components.bookCopyTable.bookCopyCreated'),
         life: 3000,
       });
       hideDialog();
     }
   } catch (error) {
-    let errorMessage = 'An unknown error has ocurred';
+    let errorMessage = t('components.general.unknowError');
     if (error instanceof Error) {
       errorMessage = handleError(error.message);
     }
@@ -173,15 +186,15 @@ const saveBookCopy = async () => {
       life: 3000,
     });
   }
-  labelSaveButton.value = 'Save';
+  labelSaveButton.value = t('components.general.save');
 };
 
 const openNew = () => {
   bookCopy.value = {};
   book.value = {};
 
-  titleDialog.value = 'New Book Copy';
-  subtitleDialog.value = "Enter the book copy's information";
+  titleDialog.value = t('components.bookCopyTable.newBookCopyTitle');
+  subtitleDialog.value = t('components.bookCopyTable.newBookCopySubtitle');
   toUpdate.value = false;
   bookCopyDialog.value = true;
 };
@@ -192,8 +205,8 @@ const editBookCopy = (bookCopyToEdit: IBookCopy) => {
   book.value = books.value.filter((b) => b.id === bookCopy.value.book?.id)[0];
   toUpdate.value = true;
 
-  titleDialog.value = 'Edit Book Copy';
-  subtitleDialog.value = "Edit the  book copy's information";
+  titleDialog.value = t('components.bookCopyTable.editBookCopyTitle');
+  subtitleDialog.value = t('components.bookCopyTable.editBookCopySubtitle');
   bookCopyDialog.value = true;
 };
 
@@ -203,33 +216,33 @@ const confirmDelete = (bookCopyToDelete: IBookCopy) => {
     if (!id) id = -1;
     bookCopy.value = bookCopyToDelete;
     confirm.require({
-      message: 'Do you want to delete this book copy?',
-      header: 'Delete book copy',
+      message: t('components.bookCopyTable.messageDelete'),
+      header: t('components.bookCopyTable.headerDelete'),
       icon: 'pi pi-info-circle',
-      rejectLabel: 'Cancel',
-      acceptLabel: 'Delete',
+      rejectLabel: t('components.general.cancel'),
+      acceptLabel: t('components.general.delete'),
       rejectClass: 'p-button-secondary',
       acceptClass: 'p-button-danger',
       accept: async () => {
         await bookCopyService.delete(id);
         toast.add({
           severity: 'success',
-          summary: 'Deleted',
-          detail: 'The book copy was deleted',
+          summary: t('components.general.deleted'),
+          detail: t('components.bookCopyTable.detailDeleted'),
           life: 3000,
         });
       },
       reject: () => {
         toast.add({
           severity: 'error',
-          summary: 'Canceled',
-          detail: 'The operation was canceled',
+          summary: t('components.general.canceled'),
+          detail: t('components.general.detailCanceled'),
           life: 3000,
         });
       },
     });
   } catch (error) {
-    let errorMessage = 'An unknown error has ocurred';
+    let errorMessage = t('components.general.unknowError');
     if (error instanceof Error) {
       errorMessage = error.message;
     }

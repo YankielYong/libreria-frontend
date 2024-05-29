@@ -39,6 +39,7 @@ class SubjectService {
 
   async create(subject: SubjectDto): Promise<void> {
     try {
+      const { id, ...details } = subject;
       const token = this.store.token;
       const res = await fetch(`${Configuration.BACKEND_HOST}/subject`, {
         method: 'POST',
@@ -47,14 +48,14 @@ class SubjectService {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(subject),
+        body: JSON.stringify({ ...details }),
       });
       const response = await res.json();
       if ('error' in response) {
         throw new Error(response.message);
       }
-      const { id } = response;
-      this.subjects.value.push({ id, ...subject });
+      subject.id = response.id;
+      this.subjects.value.push({ ...subject });
     } catch (error) {
       console.log(error);
       throw new Error(`failed: ${error}`);
