@@ -35,23 +35,39 @@
               </InputIcon>
               <InputText
                 v-model="filters['global'].value"
-                placeholder="Keyword Search"
+                :placeholder="t('components.general.keywordSearch')"
                 :pt="{ root: { style: 'margin-top: 0.2rem' } }"
               />
             </IconField>
             <Button
               v-if="canManage"
-              label="New"
+              :label="t('components.general.new')"
               icon="pi pi-plus"
               class="mr-2"
               @click="openNew"
             />
           </div>
         </template>
-        <Column field="bookCopy.book.title" header="Book" sortable></Column>
-        <Column field="user.email" header="User" sortable></Column>
-        <Column field="startDate" header="Start date" sortable></Column>
-        <Column field="endDate" header="End Date" :sortable="true"></Column>
+        <Column
+          field="bookCopy.book.title"
+          :header="t('components.loanTable.book')"
+          sortable
+        ></Column>
+        <Column
+          field="user.email"
+          :header="t('components.loanTable.user')"
+          sortable
+        ></Column>
+        <Column
+          field="startDate"
+          :header="t('components.loanTable.startDate')"
+          sortable
+        ></Column>
+        <Column
+          field="endDate"
+          :header="t('components.loanTable.endDate')"
+          :sortable="true"
+        ></Column>
         <Column v-if="canManage" style="width: 90px">
           <template #body="slotProps">
             <Button
@@ -72,13 +88,15 @@
       >
         <p class="p-text-secondary block mb-5">{{ subtitleDialog }}</p>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="bookCopy" class="font-semibold w-6rem">Book Copy</label>
+          <label for="bookCopy" class="font-semibold w-6rem">{{
+            t('components.loanTable.bookCopy')
+          }}</label>
           <Dropdown
             v-model="bookCopy"
             filter
             :options="availables"
             optionLabel="book.title"
-            placeholder="Select a book copy"
+            :placeholder="t('components.loanTable.bookCopyLabel')"
             class="w-full md:w-14rem"
             :pt="{
               list: { style: 'padding: 0; margin-bottom: 0' },
@@ -87,13 +105,15 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="user" class="font-semibold w-6rem">User</label>
+          <label for="user" class="font-semibold w-6rem">{{
+            t('components.loanTable.user')
+          }}</label>
           <Dropdown
             v-model="user"
             filter
             :options="users"
             optionLabel="email"
-            placeholder="Select an user"
+            :placeholder="t('components.loanTable.userLabel')"
             class="w-full md:w-14rem"
             :pt="{
               list: { style: 'padding: 0; margin-bottom: 0' },
@@ -102,7 +122,9 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="startDate" class="font-semibold w-6rem">Start Date</label>
+          <label for="startDate" class="font-semibold w-6rem">{{
+            t('components.loanTable.startDate')
+          }}</label>
           <Calendar
             v-model="startDate"
             showIcon
@@ -119,7 +141,9 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-5">
-          <label for="endDate" class="font-semibold w-6rem">End date</label>
+          <label for="endDate" class="font-semibold w-6rem">{{
+            t('components.loanTable.endDate')
+          }}</label>
           <Calendar
             v-model="endDate"
             showIcon
@@ -138,7 +162,7 @@
         <div class="flex justify-content-end gap-2">
           <Button
             type="button"
-            label="Cancel"
+            :label="t('components.general.cancel')"
             severity="danger"
             @click="hideDialog"
           ></Button>
@@ -155,18 +179,20 @@
 
 <script lang="ts" setup>
 import { FilterMatchMode } from 'primevue/api';
-import { onMounted, ref, type Ref } from 'vue';
+import { watchEffect, onMounted, ref, type Ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
+import { useConfirm } from 'primevue/useconfirm';
+import { useI18n } from 'vue-i18n';
 import UserService from '@/services/UserService';
 import type { IUser } from '@/interfaces/IUser';
 import LoanService from '@/services/LoanService';
 import type { ILoan } from '@/interfaces/ILoan';
 import BookCopyService from '@/services/BookCopyService';
 import type { IBookCopy } from '@/interfaces/IBookCopy';
-import { useConfirm } from 'primevue/useconfirm';
 
 const toast = useToast();
 const confirm = useConfirm();
+const { t } = useI18n();
 
 const loanService = new LoanService();
 const loans = loanService.getUsers();
@@ -191,7 +217,7 @@ const minDate = ref(new Date(new Date().getTime() + 24 * 60 * 60 * 1000));
 const loanDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
-const labelSaveButton = ref('Save');
+const labelSaveButton = ref(t('components.general.save'));
 
 const loading = ref(true);
 const filters = ref();
@@ -205,27 +231,29 @@ const saveLoan = async () => {
     endDate: endDate.value,
   };
   try {
-    labelSaveButton.value = 'Saving...';
+    labelSaveButton.value = t('components.general.saving');
     const bookCopy2 = await loanService.create(loanToUpdate.value);
     toast.add({
       severity: 'success',
-      summary: 'Book created successfully',
+      summary: t('components.loanTable.loanCreated'),
       life: 3000,
     });
     availables.value = availables.value.filter((a) => a.id !== bookCopy2.id);
     hideDialog();
   } catch (error) {
-    let errorMessage = 'An unknown error has ocurred';
+    let errorMessages = [t('components.general.unknowError')];
     if (error instanceof Error) {
-      errorMessage = handleError(error.message);
+      errorMessages = handleError(error.message);
     }
-    toast.add({
-      severity: 'error',
-      summary: errorMessage,
-      life: 3000,
-    });
+    for (const errorMessage of errorMessages) {
+      toast.add({
+        severity: 'error',
+        summary: errorMessage,
+        life: 3000,
+      });
+    }
   }
-  labelSaveButton.value = 'Save';
+  labelSaveButton.value = t('components.general.save');
 };
 
 const returnLoan = async (loanToReturn: ILoan) => {
@@ -234,20 +262,22 @@ const returnLoan = async (loanToReturn: ILoan) => {
     const bookCopy2 = await loanService.return(id || -1);
     toast.add({
       severity: 'success',
-      summary: 'Loan returned successfully',
+      summary: t('components.loanTable.loanReturned'),
       life: 3000,
     });
     availables.value.push(bookCopy2);
   } catch (error) {
-    let errorMessage = 'An unknown error has ocurred';
+    let errorMessages = [t('components.general.unknowError')];
     if (error instanceof Error) {
-      errorMessage = handleError(error.message);
+      errorMessages = handleError(error.message);
     }
-    toast.add({
-      severity: 'error',
-      summary: errorMessage,
-      life: 3000,
-    });
+    for (const errorMessage of errorMessages) {
+      toast.add({
+        severity: 'error',
+        summary: errorMessage,
+        life: 3000,
+      });
+    }
   }
 };
 
@@ -257,8 +287,8 @@ const openNew = () => {
   user.value = {};
   endDate.value = '';
 
-  titleDialog.value = 'New Loan';
-  subtitleDialog.value = "Enter the loan's information";
+  titleDialog.value = t('components.loanTable.newLoanTitle');
+  subtitleDialog.value = t('components.loanTable.newLoanSubtitle');
   loanDialog.value = true;
 };
 
@@ -269,6 +299,10 @@ const hideDialog = () => {
   endDate.value = '';
 };
 
+watchEffect(() => {
+  labelSaveButton.value = t('components.general.save');
+});
+
 onMounted(async () => {
   await loanService.fetchAll();
   await bookCopyService.fetchAll();
@@ -277,13 +311,18 @@ onMounted(async () => {
   loading.value = false;
 });
 
-const handleError = (error: string): string => {
-  if (error.includes('name should not be empty'))
-    return 'Name should not be empty';
-  if (error.includes('lastName should not be empty'))
-    return 'Last name should not be empty';
+const handleError = (error: string): string[] => {
+  let errors = [];
+  if (error.includes('bookCopy must be'))
+    errors.push(t('components.loanTable.errorBook'));
+  if (error.includes('user must be'))
+    errors.push(t('components.loanTable.errorUser'));
+  if (error.includes('endDate must be'))
+    errors.push(t('components.loanTable.errorEndDate'));
 
-  return error;
+  if (errors.length === 0) errors.push(error);
+
+  return errors;
 };
 
 const initFilters = () => {

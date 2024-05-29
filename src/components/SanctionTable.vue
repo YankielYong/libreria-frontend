@@ -30,29 +30,45 @@
               </InputIcon>
               <InputText
                 v-model="filters['global'].value"
-                placeholder="Keyword Search"
+                :placeholder="t('components.general.keywordSearch')"
                 :pt="{ root: { style: 'margin-top: 0.2rem' } }"
               />
             </IconField>
             <Button
               v-if="canManage"
-              label="New"
+              :label="t('components.general.new')"
               icon="pi pi-plus"
               class="mr-2"
               @click="openNew"
             />
           </div>
         </template>
-        <Column field="user.email" header="User" sortable></Column>
-        <Column field="startDate" header="Start date" :sortable="true"></Column>
-        <Column field="duration" header="Duration (months)" sortable></Column>
-        <Column field="endDate" header="End Date" sortable></Column>
+        <Column
+          field="user.email"
+          :header="t('components.sanctionTable.user')"
+          sortable
+        ></Column>
+        <Column
+          field="startDate"
+          :header="t('components.sanctionTable.startDate')"
+          :sortable="true"
+        ></Column>
+        <Column
+          field="duration"
+          :header="t('components.sanctionTable.duration')"
+          sortable
+        ></Column>
+        <Column
+          field="endDate"
+          :header="t('components.sanctionTable.endDate')"
+          sortable
+        ></Column>
         <Column v-if="canManage" style="width: 90px">
           <template #body="slotProps">
             <Button
               icon="pi pi-undo"
               class="mr-2"
-              v-if="slotProps.data.pending"
+              v-if="slotProps.data.isActive"
               @click="anulateSanction(slotProps.data)"
             />
           </template>
@@ -67,13 +83,15 @@
       >
         <p class="p-text-secondary block mb-5">{{ subtitleDialog }}</p>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="bookCopy" class="font-semibold w-6rem">Book Copy</label>
+          <label for="user" class="font-semibold w-6rem">{{
+            t('components.sanctionTable.user')
+          }}</label>
           <Dropdown
             v-model="user"
             filter
             :options="users"
             optionLabel="email"
-            placeholder="Select a book copy"
+            :placeholder="t('components.sanctionTable.userLabel')"
             class="w-full md:w-14rem"
             :pt="{
               list: { style: 'padding: 0; margin-bottom: 0' },
@@ -82,7 +100,9 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="startDate" class="font-semibold w-6rem">Start Date</label>
+          <label for="startDate" class="font-semibold w-6rem">{{
+            t('components.sanctionTable.startDate')
+          }}</label>
           <Calendar
             v-model="startDate"
             showIcon
@@ -99,20 +119,29 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-5">
-          <label for="startDate" class="font-semibold w-6rem">Start Date</label>
-          <InputNumber v-model="duration" inputId="integeronly" :max="12" />
+          <label for="startDate" class="font-semibold w-6rem">{{
+            t('components.sanctionTable.duration')
+          }}</label>
+          <InputNumber
+            v-model="duration"
+            inputId="integeronly"
+            :max="12"
+            :min="1"
+          />
         </div>
         <div class="flex justify-content-end gap-2">
           <Button
             type="button"
-            label="Cancel"
+            :label="t('components.general.cancel')"
             severity="danger"
             @click="hideDialog"
+            :pt="{ root: { style: 'width: 35%' } }"
           ></Button>
           <Button
             type="button"
             :label="labelSaveButton"
-            @click="saveLoan"
+            @click="saveSanction"
+            :pt="{ root: { style: 'width: 40%' } }"
           ></Button>
         </div>
       </Dialog>
@@ -122,17 +151,17 @@
 
 <script lang="ts" setup>
 import { FilterMatchMode } from 'primevue/api';
-import { onMounted, ref, type Ref } from 'vue';
+import { onMounted, ref, watchEffect, type Ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
+import { useI18n } from 'vue-i18n';
+import { addMonths } from 'date-fns';
 import UserService from '@/services/UserService';
 import type { IUser } from '@/interfaces/IUser';
-import type { IBookCopy } from '@/interfaces/IBookCopy';
 import SanctionService from '@/services/SanctionService';
 import type { ISanction } from '@/interfaces/ISanction';
-import { useConfirm } from 'primevue/useconfirm';
 
 const toast = useToast();
-const confirm = useConfirm();
+const { t } = useI18n();
 
 const sanctionService = new SanctionService();
 const sanctions = sanctionService.getSanctions();
@@ -144,7 +173,7 @@ const canManage = ref(false);
 
 const sanction: Ref<ISanction> = ref({});
 const startDate = ref(new Date());
-const duration = ref();
+const duration = ref(1);
 const endDate = ref();
 const user: Ref<IUser> = ref({});
 const sanctionToUpdate = ref();
@@ -152,59 +181,80 @@ const sanctionToUpdate = ref();
 const sanctionDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
-const labelSaveButton = ref('Save');
+const labelSaveButton = ref(t('components.general.save'));
 
 const loading = ref(true);
 const filters = ref();
 
-const saveLoan = async () => {
+const saveSanction = async () => {
   sanctionToUpdate.value = {
     id: sanction.value.id,
     startDate: startDate.value,
     duration: duration.value,
-    endDate: endDate.value,
+    endDate: addMonths(startDate.value, duration.value),
     user: user.value,
   };
   try {
-    labelSaveButton.value = 'Saving...';
+    labelSaveButton.value = t('components.general.saving');
     await sanctionService.create(sanctionToUpdate.value);
     toast.add({
       severity: 'success',
-      summary: 'Book created successfully',
+      summary: t('components.sanctionTable.sanctionCreated'),
       life: 3000,
     });
     hideDialog();
   } catch (error) {
-    let errorMessage = 'An unknown error has ocurred';
+    let errorMessages = [t('components.general.unknowError')];
     if (error instanceof Error) {
-      errorMessage = handleError(error.message);
+      errorMessages = handleError(error.message);
     }
-    toast.add({
-      severity: 'error',
-      summary: errorMessage,
-      life: 3000,
-    });
+    for (const errorMessage of errorMessages) {
+      toast.add({
+        severity: 'error',
+        summary: errorMessage,
+        life: 3000,
+      });
+    }
   }
-  labelSaveButton.value = 'Save';
+  labelSaveButton.value = t('components.general.save');
 };
 
 // TO DO
-const anulateSanction = async (sanctionToAnulate: ISanction) => {};
+const anulateSanction = async (sanctionToAnulate: ISanction) => {
+  const { id } = sanctionToAnulate;
+  let myId = -1;
+  if (id) myId = id;
+  try {
+    await sanctionService.desactivate(myId);
+  } catch (error) {
+    let errorMessages = [t('components.general.unknowError')];
+    if (error instanceof Error) {
+      errorMessages = handleError(error.message);
+    }
+    for (const errorMessage of errorMessages) {
+      toast.add({
+        severity: 'error',
+        summary: errorMessage,
+        life: 3000,
+      });
+    }
+  }
+};
 
 const openNew = () => {
   sanction.value = {};
-  duration.value = '';
+  duration.value = 1;
   endDate.value = '';
   user.value = {};
 
-  titleDialog.value = 'New Loan';
-  subtitleDialog.value = "Enter the loan's information";
+  titleDialog.value = t('components.sanctionTable.newSanctionTitle');
+  subtitleDialog.value = t('components.sanctionTable.newSanctionSubtitle');
   sanctionDialog.value = true;
 };
 
 const hideDialog = () => {
   sanctionDialog.value = false;
-  duration.value = '';
+  duration.value = 1;
   endDate.value = '';
   user.value = {};
 };
@@ -216,13 +266,20 @@ onMounted(async () => {
   loading.value = false;
 });
 
-const handleError = (error: string): string => {
-  if (error.includes('name should not be empty'))
-    return 'Name should not be empty';
-  if (error.includes('lastName should not be empty'))
-    return 'Last name should not be empty';
+watchEffect(() => {
+  labelSaveButton.value = t('components.general.save');
+});
 
-  return error;
+const handleError = (error: string): string[] => {
+  let errors = [];
+  if (error.includes('name should not be empty'))
+    errors.push(t('components.userTable.errorEmailExists'));
+  if (error.includes('lastName should not be empty'))
+    errors.push(t('components.userTable.errorEmailExists'));
+
+  if (errors.length === 0) errors.push(error);
+
+  return errors;
 };
 
 const initFilters = () => {

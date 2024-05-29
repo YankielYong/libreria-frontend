@@ -88,7 +88,7 @@
             :label="t('components.general.cancel')"
             severity="danger"
             @click="hideDialog"
-            :pt="{ root: { style: 'width: 30%' } }"
+            :pt="{ root: { style: 'width: 35%' } }"
           ></Button>
           <Button
             type="button"
@@ -110,6 +110,7 @@ import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
 import SubjectService from '@/services/SubjectService';
 import type { ISubject } from '@/interfaces/ISubject';
+import { watchEffect } from 'vue';
 
 const toast = useToast();
 const confirm = useConfirm();
@@ -246,6 +247,10 @@ const hideDialog = () => {
   name.value = '';
   toUpdate.value = false;
 };
+
+watchEffect(() => {
+  labelSaveButton.value = t('components.general.save');
+});
 
 onMounted(async () => {
   await subjectService.fetchAll();

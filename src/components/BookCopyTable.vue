@@ -99,7 +99,7 @@
             :label="t('components.general.cancel')"
             severity="danger"
             @click="hideDialog"
-            :pt="{ root: { style: 'width: 30%' } }"
+            :pt="{ root: { style: 'width: 35%' } }"
           ></Button>
           <Button
             type="button"
@@ -115,7 +115,7 @@
 
 <script lang="ts" setup>
 import { FilterMatchMode } from 'primevue/api';
-import { onMounted, ref, type Ref } from 'vue';
+import { onMounted, ref, watchEffect, type Ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
 import { useI18n } from 'vue-i18n';
@@ -260,6 +260,10 @@ const hideDialog = () => {
   book.value = {};
   toUpdate.value = false;
 };
+
+watchEffect(() => {
+  labelSaveButton.value = t('components.general.save');
+});
 
 onMounted(async () => {
   await bookCopyService.fetchAll();

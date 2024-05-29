@@ -30,23 +30,39 @@
               </InputIcon>
               <InputText
                 v-model="filters['global'].value"
-                placeholder="Keyword Search"
+                :placeholder="t('components.general.keywordSearch')"
                 :pt="{ root: { style: 'margin-top: 0.2rem' } }"
               />
             </IconField>
             <Button
               v-if="canManage"
-              label="New"
+              :label="t('components.general.new')"
               icon="pi pi-plus"
               class="mr-2"
               @click="openNew"
             />
           </div>
         </template>
-        <Column field="name" header="Name" sortable></Column>
-        <Column field="lastName" header="Last Name" :sortable="true"></Column>
-        <Column field="email" header="Email" :sortable="true"></Column>
-        <Column field="role" header="Role" :sortable="true"></Column>
+        <Column
+          field="name"
+          :header="t('components.userTable.name')"
+          sortable
+        ></Column>
+        <Column
+          field="lastName"
+          :header="t('components.userTable.lastName')"
+          :sortable="true"
+        ></Column>
+        <Column
+          field="email"
+          :header="t('components.userTable.email')"
+          :sortable="true"
+        ></Column>
+        <Column
+          field="role"
+          :header="t('components.userTable.role')"
+          :sortable="true"
+        ></Column>
         <Column v-if="canManage" style="width: 90px">
           <template #body="slotProps">
             <Button
@@ -66,7 +82,9 @@
       >
         <p class="p-text-secondary block mb-5">{{ subtitleDialog }}</p>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="name" class="font-semibold w-6rem">Name</label>
+          <label for="name" class="font-semibold w-6rem">{{
+            t('components.userTable.name')
+          }}</label>
           <InputText
             id="name"
             v-model="name"
@@ -75,7 +93,9 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="lastname" class="font-semibold w-6rem">Last Name</label>
+          <label for="lastname" class="font-semibold w-6rem">{{
+            t('components.userTable.lastName')
+          }}</label>
           <InputText
             id="lastname"
             v-model="lastName"
@@ -84,7 +104,9 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="dni" class="font-semibold w-6rem">DNI</label>
+          <label for="dni" class="font-semibold w-6rem">{{
+            t('components.userTable.dni')
+          }}</label>
           <InputText
             id="dni"
             v-model="dni"
@@ -93,7 +115,9 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="email" class="font-semibold w-6rem">Email</label>
+          <label for="email" class="font-semibold w-6rem">{{
+            t('components.userTable.email')
+          }}</label>
           <InputText
             id="email"
             v-model="email"
@@ -102,7 +126,9 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-3">
-          <label for="pwd" class="font-semibold w-6rem">Password</label>
+          <label for="pwd" class="font-semibold w-6rem">{{
+            t('components.userTable.password')
+          }}</label>
           <Password
             v-model="password"
             inputId="pwd"
@@ -111,12 +137,14 @@
           />
         </div>
         <div class="flex align-items-center gap-3 mb-5">
-          <label for="role" class="font-semibold w-6rem">Role</label>
+          <label for="role" class="font-semibold w-6rem">{{
+            t('components.userTable.role')
+          }}</label>
           <Dropdown
             v-model="role"
             :options="roles"
             optionLabel="name"
-            placeholder="Select a Role"
+            :placeholder="t('components.userTable.roleLabel')"
             class="w-full md:w-14rem"
             :pt="{
               list: { style: 'padding: 0; margin-bottom: 0' },
@@ -127,7 +155,7 @@
         <div class="flex justify-content-end gap-2">
           <Button
             type="button"
-            label="Cancel"
+            :label="t('components.general.cancel')"
             severity="danger"
             @click="hideDialog"
             :pt="{ root: { style: 'width: 30%' } }"
@@ -146,15 +174,17 @@
 
 <script lang="ts" setup>
 import { FilterMatchMode } from 'primevue/api';
-import { onMounted, ref, type Ref } from 'vue';
+import { onMounted, ref, watchEffect, type Ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
+import { useI18n } from 'vue-i18n';
 import UserService from '@/services/UserService';
 import type { IUser } from '@/interfaces/IUser';
 import { RoleType } from '@/util/enum/RoleType';
 
 const toast = useToast();
 const confirm = useConfirm();
+const { t } = useI18n();
 
 const userService = new UserService();
 const users = userService.getUsers();
@@ -178,7 +208,7 @@ const roles = ref([
 const userDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
-const labelSaveButton = ref('Save');
+const labelSaveButton = ref(t('components.general.save'));
 
 const loading = ref(true);
 const filters = ref();
@@ -194,26 +224,28 @@ const saveUser = async () => {
     role: role.value.name,
   };
   try {
-    labelSaveButton.value = 'Saving...';
+    labelSaveButton.value = t('components.general.saving');
     await userService.create(newUser.value);
     toast.add({
       severity: 'success',
-      summary: 'User created successfully',
+      summary: t('components.userTable.userCreated'),
       life: 3000,
     });
     hideDialog();
   } catch (error) {
-    let errorMessage = 'An unknown error has ocurred';
+    let errorMessages = [t('components.general.unknowError')];
     if (error instanceof Error) {
-      errorMessage = handleError(error.message);
+      errorMessages = handleError(error.message);
     }
-    toast.add({
-      severity: 'error',
-      summary: errorMessage,
-      life: 3000,
-    });
+    for (const errorMessage of errorMessages) {
+      toast.add({
+        severity: 'error',
+        summary: errorMessage,
+        life: 3000,
+      });
+    }
   }
-  labelSaveButton.value = 'Save';
+  labelSaveButton.value = t('components.general.save');
 };
 
 const openNew = () => {
@@ -225,8 +257,8 @@ const openNew = () => {
   dni.value = '';
   role.value = { name: RoleType.USER };
 
-  titleDialog.value = 'New User';
-  subtitleDialog.value = "Enter the user's information";
+  titleDialog.value = t('components.userTable.newUserTitle');
+  subtitleDialog.value = t('components.userTable.newUserSubtitle');
   userDialog.value = true;
 };
 
@@ -236,33 +268,33 @@ const confirmDelete = (userToDelete: IUser) => {
     if (!id) id = -1;
     user.value = userToDelete;
     confirm.require({
-      message: 'Do you want to delete this user?',
-      header: 'Delete user',
+      message: t('components.userTable.messageDelete'),
+      header: t('components.userTable.headerDelete'),
       icon: 'pi pi-info-circle',
-      rejectLabel: 'Cancel',
-      acceptLabel: 'Delete',
+      rejectLabel: t('components.general.cancel'),
+      acceptLabel: t('components.general.delete'),
       rejectClass: 'p-button-secondary',
       acceptClass: 'p-button-danger',
       accept: async () => {
         await userService.delete(id);
         toast.add({
           severity: 'success',
-          summary: 'Deleted',
-          detail: 'The user was deleted',
+          summary: t('components.general.deleted'),
+          detail: t('components.userTable.detailDeleted'),
           life: 3000,
         });
       },
       reject: () => {
         toast.add({
           severity: 'error',
-          summary: 'Canceled',
-          detail: 'The operation was canceled',
+          summary: t('components.general.canceled'),
+          detail: t('components.general.detailCanceled'),
           life: 3000,
         });
       },
     });
   } catch (error) {
-    let errorMessage = 'An unknown error has ocurred';
+    let errorMessage = t('components.general.unknowError');
     if (error instanceof Error) {
       errorMessage = error.message;
     }
@@ -285,6 +317,10 @@ const hideDialog = () => {
   role.value = { name: RoleType.USER };
 };
 
+watchEffect(() => {
+  labelSaveButton.value = t('components.general.save');
+});
+
 onMounted(async () => {
   canManage.value = await userService.canManage();
   await userService.fetchAll();
@@ -297,26 +333,34 @@ const initFilters = () => {
   };
 };
 
-const handleError = (error: string): string => {
+const handleError = (error: string): string[] => {
+  let errors = [];
   if (error.includes('name should not be empty'))
-    return 'Name should not be empty';
+    errors.push(t('components.userTable.errorNameEmpty'));
   if (error.includes('lastName should not be empty'))
-    return 'Last name should not be empty';
+    errors.push(t('components.userTable.errorLastNameEmpty'));
   if (error.includes('dni must be longer than or equal to 11 characters'))
-    return 'DNI must have 11 digits';
+    errors.push(t('components.userTable.errorDniLength'));
   if (error.includes('email should not be empty'))
-    return 'Email should not be empty';
+    errors.push(t('components.userTable.errorEmailEmpty'));
   if (error.includes('password must be longer than or equal to 8 characters'))
-    return 'Password must be longer than or equal to 8 characters';
-  if (error.includes('role must be one of the')) return 'Select a role';
-  if (error.includes('email must be an email')) return 'Email not valid';
+    errors.push(t('components.userTable.errorPasswordEmpty'));
+  if (error.includes('role must be one of the'))
+    errors.push(t('components.userTable.errorRoleEmpty'));
+  if (error.includes('email must be an email'))
+    errors.push(t('components.userTable.errorEmailInvalid'));
   if (error.includes('dni must be a number string'))
-    return 'DNI must have only digits';
-  if (error.includes('Invalid dni')) return 'DNI not valid';
-  if (error.includes('Ya existe la llave (dni)')) return 'DNI already exists';
-  if (error.includes('Email already exists')) return 'Email already exists';
+    errors.push(t('components.userTable.errorDniDigits'));
+  if (error.includes('Invalid dni'))
+    errors.push(t('components.userTable.errorDni'));
+  if (error.includes('Ya existe la llave (dni)'))
+    errors.push(t('components.userTable.errorDniExists'));
+  if (error.includes('Email already exists'))
+    errors.push(t('components.userTable.errorEmailExists'));
 
-  return error;
+  if (errors.length === 0) errors.push(error);
+
+  return errors;
 };
 
 initFilters();
