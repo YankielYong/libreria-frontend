@@ -30,21 +30,24 @@
               </InputIcon>
               <InputText
                 v-model="filters['global'].value"
-                placeholder="Keyword Search"
+                :placeholder="t('components.general.keywordSearch')"
                 :pt="{ root: { style: 'margin-top: 0.2rem' } }"
               />
             </IconField>
             <Button
               v-if="canManage"
-              label="New"
+              :label="t('components.general.new')"
               icon="pi pi-plus"
               class="mr-2"
               @click="openNew"
             />
           </div>
         </template>
-        <template #loading> Loading subjects. Please wait. </template>
-        <Column field="name" header="Name" sortable></Column>
+        <Column
+          field="name"
+          :header="t('components.subjectTable.name')"
+          sortable
+        ></Column>
         <Column v-if="canManage" style="width: 144px">
           <template #body="slotProps">
             <Button
@@ -69,7 +72,9 @@
       >
         <p class="p-text-secondary block mb-5">{{ subtitleDialog }}</p>
         <div class="flex align-items-center gap-3 mb-5">
-          <label for="name" class="font-semibold w-6rem">Name</label>
+          <label for="name" class="font-semibold w-6rem">{{
+            t('components.subjectTable.name')
+          }}</label>
           <InputText
             id="name"
             v-model="name"
@@ -80,7 +85,7 @@
         <div class="flex justify-content-end gap-2">
           <Button
             type="button"
-            label="Cancel"
+            :label="t('components.general.cancel')"
             severity="danger"
             @click="hideDialog"
             :pt="{ root: { style: 'width: 30%' } }"
@@ -89,7 +94,7 @@
             type="button"
             :label="labelSaveButton"
             @click="saveSubject"
-            :pt="{ root: { style: 'width: 35%' } }"
+            :pt="{ root: { style: 'width: 40%' } }"
           ></Button>
         </div>
       </Dialog>
@@ -102,11 +107,13 @@ import { FilterMatchMode } from 'primevue/api';
 import { onMounted, ref, type Ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
+import { useI18n } from 'vue-i18n';
 import SubjectService from '@/services/SubjectService';
 import type { ISubject } from '@/interfaces/ISubject';
 
 const toast = useToast();
 const confirm = useConfirm();
+const { t } = useI18n();
 
 const subjectService = new SubjectService();
 const subjects = subjectService.getSubjects();
@@ -120,7 +127,8 @@ const subjectToUpdate = ref();
 const subjectDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
-const labelSaveButton = ref('Save');
+const labelSaveButton = ref('');
+labelSaveButton.value = t('components.general.save');
 const toUpdate = ref(false);
 
 const loading = ref(true);
@@ -132,12 +140,12 @@ const saveSubject = async () => {
     name: name.value,
   };
   try {
-    labelSaveButton.value = 'Saving...';
+    labelSaveButton.value = t('components.general.saving');
     if (toUpdate.value) {
       await subjectService.update(subjectToUpdate.value);
       toast.add({
         severity: 'success',
-        summary: 'Subject updated successfully',
+        summary: t('components.subjectTable.subjectUpdated'),
         life: 3000,
       });
       hideDialog();
@@ -146,31 +154,33 @@ const saveSubject = async () => {
       await subjectService.create(subjectToUpdate.value);
       toast.add({
         severity: 'success',
-        summary: 'Subject created successfully',
+        summary: t('components.subjectTable.subjectCreated'),
         life: 3000,
       });
       hideDialog();
     }
   } catch (error) {
-    let errorMessage = 'An unexpected error has ocurred';
+    let errorMessages = [t('components.general.unknowError')];
     if (error instanceof Error) {
-      errorMessage = error.message;
+      errorMessages = handleError(error.message);
     }
-    toast.add({
-      severity: 'error',
-      summary: errorMessage,
-      life: 3000,
-    });
+    for (const errorMessage of errorMessages) {
+      toast.add({
+        severity: 'error',
+        summary: errorMessage,
+        life: 3000,
+      });
+    }
   }
-  labelSaveButton.value = 'Save';
+  labelSaveButton.value = t('components.general.save');
 };
 
 const openNew = () => {
   subject.value = {};
   name.value = '';
 
-  titleDialog.value = 'New Subject';
-  subtitleDialog.value = "Enter the subject's information";
+  titleDialog.value = t('components.subjectTable.newSubjectTitle');
+  subtitleDialog.value = t('components.subjectTable.newSubjectSubtitle');
   toUpdate.value = false;
   subjectDialog.value = true;
 };
@@ -181,8 +191,8 @@ const editSubject = (subjectToEdit: ISubject) => {
   name.value = subject.value.name;
   toUpdate.value = true;
 
-  titleDialog.value = 'Edit Subject';
-  subtitleDialog.value = "Edit the subject's information";
+  titleDialog.value = t('components.subjectTable.editSubjectTitle');
+  subtitleDialog.value = t('components.subjectTable.editSubjectSubtitle');
   subjectDialog.value = true;
 };
 
@@ -192,33 +202,33 @@ const confirmDelete = (subjectToDelete: ISubject) => {
     if (!id) id = -1;
     subject.value = subjectToDelete;
     confirm.require({
-      message: 'Do you want to delete this subject?',
-      header: 'Delete subject',
+      message: t('components.subjectTable.messageDelete'),
+      header: t('components.subjectTable.headerDelete'),
       icon: 'pi pi-info-circle',
-      rejectLabel: 'Cancel',
-      acceptLabel: 'Delete',
+      rejectLabel: t('components.general.cancel'),
+      acceptLabel: t('components.general.delete'),
       rejectClass: 'p-button-secondary',
       acceptClass: 'p-button-danger',
       accept: async () => {
         await subjectService.delete(id);
         toast.add({
           severity: 'success',
-          summary: 'Deleted',
-          detail: 'The subject was deleted',
+          summary: t('components.general.deleted'),
+          detail: t('components.subjectTable.detailDeleted'),
           life: 3000,
         });
       },
       reject: () => {
         toast.add({
           severity: 'error',
-          summary: 'Canceled',
-          detail: 'The operation was canceled',
+          summary: t('components.general.canceled'),
+          detail: t('components.general.detailCanceled'),
           life: 3000,
         });
       },
     });
   } catch (error) {
-    let errorMessage = 'An unexpected error has ocurred';
+    let errorMessage = t('components.general.unknowError');
     if (error instanceof Error) {
       errorMessage = error.message;
     }
@@ -243,12 +253,14 @@ onMounted(async () => {
   loading.value = false;
 });
 
-// TO DO
-const handleError = (error: string): string => {
+const handleError = (error: string): string[] => {
+  let errors = [];
   if (error.includes('name should not be empty'))
-    return 'Name should not be empty';
+    errors.push(t('components.subjectTable.errorName'));
 
-  return error;
+  if (errors.length === 0) errors.push(error);
+
+  return errors;
 };
 
 const initFilters = () => {

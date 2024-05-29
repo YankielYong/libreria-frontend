@@ -1,4 +1,5 @@
 export class UserDto {
+  id: number;
   email: string;
   password: string;
   name: string;
@@ -7,6 +8,7 @@ export class UserDto {
   role?: number;
 
   constructor(
+    id: number,
     email: string,
     password: string,
     name: string,
@@ -14,6 +16,7 @@ export class UserDto {
     dni: string,
     role?: number
   ) {
+    this.id = id;
     this.email = email;
     this.password = password;
     this.name = name;

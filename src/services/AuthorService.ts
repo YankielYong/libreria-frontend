@@ -39,6 +39,7 @@ class AuthorService {
 
   async create(author: AuthorDto): Promise<void> {
     try {
+      const { id, ...details } = author;
       const token = this.store.token;
       const res = await fetch(`${Configuration.BACKEND_HOST}/author`, {
         method: 'POST',
@@ -47,14 +48,14 @@ class AuthorService {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(author),
+        body: JSON.stringify({ ...details }),
       });
       const response = await res.json();
       if ('error' in response) {
         throw new Error(response.message);
       }
-      const { id } = response;
-      this.authors.value.push({ id, ...author });
+      author.id = response.id;
+      this.authors.value.push({ ...author });
     } catch (error) {
       console.log(error);
       throw new Error(`failed: ${error}`);

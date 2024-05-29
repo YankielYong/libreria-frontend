@@ -42,7 +42,7 @@ class LoanService {
 
   async create(loan: LoanDto): Promise<IBookCopy> {
     try {
-      const { bookCopy, user, startDate, endDate, ...details } = loan;
+      const { id, bookCopy, user, startDate, endDate, ...details } = loan;
       const bookCopyId = bookCopy?.id;
       const userId = user?.id;
       const token = this.store.token;
@@ -65,15 +65,8 @@ class LoanService {
       if ('error' in response) {
         throw new Error(response.message);
       }
-      const { id } = response;
-      this.loans.value.push({
-        id,
-        bookCopy,
-        user,
-        startDate,
-        endDate,
-        ...details,
-      });
+      loan.id = response.id;
+      this.loans.value.push({ ...loan });
       return bookCopy || {};
     } catch (error) {
       console.log(error);

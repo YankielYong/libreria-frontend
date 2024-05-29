@@ -22,16 +22,15 @@
             v-model="sortKey"
             :options="sortOptions"
             optionLabel="label"
-            placeholder="Sort By Title"
+            :placeholder="t('components.bookDetails.sortLabel')"
             @change="onSortChange($event)"
             :pt="{
-              root: { style: 'width: 12rem' },
               list: { style: 'padding: 0; margin-bottom: 0' },
             }"
           />
           <Button
             v-if="canManage"
-            label="New"
+            :label="t('components.general.new')"
             icon="pi pi-plus"
             class="mr-2"
             @click="openNew"
@@ -80,7 +79,8 @@
                         {{ item.publisher }}
                       </p>
                       <div class="text-lg font-medium text-900 mt-2">
-                        {{ item.numberPages }} pages
+                        {{ item.numberPages }}
+                        {{ t('components.bookDetails.pages') }}
                       </div>
                     </div>
                   </div>
@@ -126,7 +126,9 @@
     >
       <p class="p-text-secondary block mb-5">{{ subtitleDialog }}</p>
       <div class="my-flex align-items-center gap-3 mb-3">
-        <label for="title" class="font-semibold w-6rem">Title</label>
+        <label for="title" class="font-semibold w-6rem">{{
+          t('components.bookDetails.title')
+        }}</label>
         <InputText
           id="title"
           v-model="title"
@@ -135,13 +137,15 @@
         />
       </div>
       <div class="my-flex align-items-center gap-3 mb-3">
-        <label for="integeronly" class="font-semibold w-6rem"
-          >Year of Edition</label
-        >
-        <InputNumber v-model="yearEdition" inputId="integeronly" />
+        <label for="integeronly" class="font-semibold w-6rem">{{
+          t('components.bookDetails.yearEdition')
+        }}</label>
+        <InputNumber v-model="yearEdition" inputId="integeronly" :min="1900" />
       </div>
       <div class="my-flex align-items-center gap-3 mb-3">
-        <label for="publisher" class="font-semibold w-6rem">Publisher</label>
+        <label for="publisher" class="font-semibold w-6rem">{{
+          t('components.bookDetails.publisher')
+        }}</label>
         <InputText
           id="publisher"
           v-model="publisher"
@@ -150,13 +154,15 @@
         />
       </div>
       <div class="my-flex align-items-center gap-3 mb-3">
-        <label for="country" class="font-semibold w-6rem">Country</label>
+        <label for="country" class="font-semibold w-6rem">{{
+          t('components.bookDetails.country')
+        }}</label>
         <Dropdown
           v-model="country"
           filter
           :options="countries"
           optionLabel="name"
-          placeholder="Select a Country"
+          :placeholder="t('components.bookDetails.labelCountry')"
           class="w-full md:w-14rem"
           :pt="{
             list: { style: 'padding: 0; margin-bottom: 0' },
@@ -165,23 +171,27 @@
         />
       </div>
       <div class="my-flex align-items-center gap-3 mb-3">
-        <label for="summary" class="font-semibold w-6rem">Summary</label>
+        <label for="summary" class="font-semibold w-6rem">{{
+          t('components.bookDetails.summary')
+        }}</label>
         <Textarea v-model="summary" variant="filled" rows="5" cols="30" />
       </div>
       <div class="my-flex align-items-center gap-3 mb-3">
-        <label for="integeronly" class="font-semibold w-6rem"
-          >Number of Pages</label
-        >
-        <InputNumber v-model="numberPages" inputId="integeronly" />
+        <label for="integeronly" class="font-semibold w-6rem">{{
+          t('components.bookDetails.numberPages')
+        }}</label>
+        <InputNumber v-model="numberPages" inputId="integeronly" :min="1" />
       </div>
       <div class="my-flex align-items-center gap-3 mb-3">
-        <label for="subject" class="font-semibold w-6rem">Subject</label>
+        <label for="subject" class="font-semibold w-6rem">{{
+          t('components.bookDetails.subject')
+        }}</label>
         <Dropdown
           v-model="subject"
           filter
           :options="subjects"
           optionLabel="name"
-          placeholder="Select a Subject"
+          :placeholder="t('components.bookDetails.subjectLabel')"
           class="w-full md:w-14rem"
           :pt="{
             list: { style: 'padding: 0; margin-bottom: 0' },
@@ -190,13 +200,15 @@
         />
       </div>
       <div class="my-flex align-items-center gap-3 mb-5">
-        <label for="subject" class="font-semibold w-6rem">Authors</label>
+        <label for="subject" class="font-semibold w-6rem">{{
+          t('components.bookDetails.authors')
+        }}</label>
         <MultiSelect
           v-model="authors"
           :options="allAuthors"
           filter
           :optionLabel="formatAuthorsName"
-          placeholder="Select Authors"
+          :placeholder="t('components.bookDetails.authorsLabel')"
           :maxSelectedLabels="5"
           class="w-full md:w-20rem"
         />
@@ -204,7 +216,7 @@
       <div class="my-flex justify-content-end gap-2">
         <Button
           type="button"
-          label="Cancel"
+          :label="t('components.general.cancel')"
           severity="danger"
           @click="hideDialog"
           :pt="{ root: { style: 'width: 30%' } }"
@@ -213,7 +225,7 @@
           type="button"
           :label="labelSaveButton"
           @click="saveBook"
-          :pt="{ root: { style: 'width: 35%' } }"
+          :pt="{ root: { style: 'width: 40%' } }"
         ></Button>
       </div>
     </Dialog>
@@ -223,18 +235,19 @@
 <script lang="ts" setup>
 import { useToast } from 'primevue/usetoast';
 import { useConfirm } from 'primevue/useconfirm';
+import { useI18n } from 'vue-i18n';
 import BookService from '@/services/BookService';
 import type { IBook } from '@/interfaces/IBook';
-import { getCurrentInstance, onMounted, ref, type Ref } from 'vue';
+import { onMounted, ref, type Ref } from 'vue';
 import { Countries } from '@/util/enum/Country';
 import type { ISubject } from '@/interfaces/ISubject';
 import type { IAuthor } from '@/interfaces/IAuthor';
 import SubjectService from '@/services/SubjectService';
 import AuthorService from '@/services/AuthorService';
-import router from '@/router';
 
 const toast = useToast();
 const confirm = useConfirm();
+const { t } = useI18n();
 
 const bookService = new BookService();
 const books = bookService.getBooks();
@@ -262,7 +275,8 @@ const bookToUpdate = ref();
 const bookDialog = ref(false);
 const titleDialog = ref('');
 const subtitleDialog = ref('');
-const labelSaveButton = ref('Save');
+const labelSaveButton = ref('');
+labelSaveButton.value = t('components.general.save');
 const toUpdate = ref(false);
 
 const loading = ref(true);
@@ -302,12 +316,12 @@ const saveBook = async () => {
     authors: authors.value,
   };
   try {
-    labelSaveButton.value = 'Saving...';
+    labelSaveButton.value = t('components.general.saving');
     if (toUpdate.value) {
       await bookService.update(bookToUpdate.value);
       toast.add({
         severity: 'success',
-        summary: 'Book updated successfully',
+        summary: t('components.bookDetails.bookUpdated'),
         life: 3000,
       });
       hideDialog();
@@ -316,23 +330,25 @@ const saveBook = async () => {
       await bookService.create(bookToUpdate.value);
       toast.add({
         severity: 'success',
-        summary: 'Book created successfully',
+        summary: t('components.bookDetails.bookCreated'),
         life: 3000,
       });
       hideDialog();
     }
   } catch (error) {
-    let errorMessage = 'An unknown error has ocurred';
+    let errorMessages = [t('components.general.unknowError')];
     if (error instanceof Error) {
-      errorMessage = handleError(error.message);
+      errorMessages = handleError(error.message);
     }
-    toast.add({
-      severity: 'error',
-      summary: errorMessage,
-      life: 3000,
-    });
+    for (const errorMessage of errorMessages) {
+      toast.add({
+        severity: 'error',
+        summary: errorMessage,
+        life: 3000,
+      });
+    }
   }
-  labelSaveButton.value = 'Save';
+  labelSaveButton.value = t('components.general.save');
 };
 
 const openNew = () => {
@@ -346,8 +362,8 @@ const openNew = () => {
   subject.value = {};
   authors.value = [];
 
-  titleDialog.value = 'New Book';
-  subtitleDialog.value = "Enter the book's information";
+  titleDialog.value = t('components.bookDetails.newBookTitle');
+  subtitleDialog.value = t('components.bookDetails.newBookSubtitle');
   toUpdate.value = false;
   bookDialog.value = true;
 };
@@ -375,8 +391,8 @@ const editBook = (bookToEdit: IAuthor) => {
     }) || [];
   toUpdate.value = true;
 
-  titleDialog.value = 'Edit Book';
-  subtitleDialog.value = "Edit the book's information";
+  titleDialog.value = t('components.bookDetails.editBookTitle');
+  subtitleDialog.value = t('components.bookDetails.editBookSubtitle');
   bookDialog.value = true;
 };
 
@@ -386,33 +402,33 @@ const confirmDelete = (bookToDelete: IBook) => {
     if (!id) id = -1;
     book.value = bookToDelete;
     confirm.require({
-      message: 'Do you want to delete this book?',
-      header: 'Delete book',
+      message: t('components.bookDetails.messageDelete'),
+      header: t('components.bookDetails.headerDelete'),
       icon: 'pi pi-info-circle',
-      rejectLabel: 'Cancel',
-      acceptLabel: 'Delete',
+      rejectLabel: t('components.general.cancel'),
+      acceptLabel: t('components.general.delete'),
       rejectClass: 'p-button-secondary',
       acceptClass: 'p-button-danger',
       accept: async () => {
         await bookService.delete(id);
         toast.add({
           severity: 'success',
-          summary: 'Deleted',
-          detail: 'The book was deleted',
+          summary: t('components.general.deleted'),
+          detail: t('components.bookDetails.detailDeleted'),
           life: 3000,
         });
       },
       reject: () => {
         toast.add({
           severity: 'error',
-          summary: 'Canceled',
-          detail: 'The operation was canceled',
+          summary: t('components.general.canceled'),
+          detail: t('components.general.detailCanceled'),
           life: 3000,
         });
       },
     });
   } catch (error) {
-    let errorMessage = 'An unknown error has ocurred';
+    let errorMessage = t('components.general.unknowError');
     if (error instanceof Error) {
       errorMessage = error.message;
     }
@@ -446,13 +462,28 @@ onMounted(async () => {
   loading.value = false;
 });
 
-const handleError = (error: string): string => {
-  if (error.includes('name should not be empty'))
-    return 'Name should not be empty';
-  if (error.includes('lastName should not be empty'))
-    return 'Last name should not be empty';
+const handleError = (error: string): string[] => {
+  let errors = [];
+  if (error.includes('title should not be empty'))
+    errors.push(t('components.bookDetails.errorTitle'));
+  if (error.includes('yearEdition should not be empty'))
+    errors.push(t('components.bookDetails.errorYearEdition'));
+  if (error.includes('publisher should not be empty'))
+    errors.push(t('components.bookDetails.errorPublisher'));
+  if (error.includes('country should not be empty'))
+    errors.push(t('components.bookDetails.errorCountry'));
+  if (error.includes('summary should not be empty'))
+    errors.push(t('components.bookDetails.errorSummary'));
+  if (error.includes('numberPages must be a positive number'))
+    errors.push(t('components.bookDetails.errorNumberPages'));
+  if (error.includes('subject must be a positive number'))
+    errors.push(t('components.bookDetails.errorSubject'));
+  if (error.includes('authors must be longer than or equal to 1 characters'))
+    errors.push(t('components.bookDetails.errorAuthors'));
 
-  return error;
+  if (errors.length === 0) errors.push(error);
+
+  return errors;
 };
 
 const formatAuthorsName = (author: IAuthor) =>

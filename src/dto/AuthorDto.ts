@@ -1,9 +1,11 @@
-export class AuthorDto{
-    name: string;
-    lastName: string;
+export class AuthorDto {
+  id: number;
+  name: string;
+  lastName: string;
 
-    constructor(name: string, lastName: string) {
-        this.name = name;
-        this.lastName = lastName;
-    }
+  constructor(id: number, name: string, lastName: string) {
+    this.id = id;
+    this.name = name;
+    this.lastName = lastName;
+  }
 }
