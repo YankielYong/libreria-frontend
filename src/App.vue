@@ -44,6 +44,11 @@
           $t('views.home.nav.users')
         }}</router-link>
       </li>
+      <li>
+        <router-link to="/reports" class="nav-item">{{
+          $t('views.home.nav.reports')
+        }}</router-link>
+      </li>
     </ul>
     <div>
       <select v-model="$i18n.locale">
