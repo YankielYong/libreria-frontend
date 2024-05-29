@@ -38,7 +38,7 @@ class BookService {
 
   async create(book: BookDto): Promise<void> {
     try {
-      const { subject, authors, ...details } = book;
+      const { id, subject, authors, ...details } = book;
       const subjectId = subject.id;
       const authorsIds = authors.map((a) => a.id);
       const token = this.store.token;
@@ -59,8 +59,8 @@ class BookService {
       if ('error' in response) {
         throw new Error(response.message);
       }
-      const { id } = response;
-      this.books.value.push({ id, subject, authors, ...details });
+      book.id = response.id;
+      this.books.value.push({ ...book });
     } catch (error) {
       console.log(error);
       throw new Error(`failed: ${error}`);

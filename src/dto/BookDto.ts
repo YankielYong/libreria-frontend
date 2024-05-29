@@ -2,6 +2,7 @@ import type { IAuthor } from '@/interfaces/IAuthor';
 import type { ISubject } from '@/interfaces/ISubject';
 
 export class BookDto {
+  id: number;
   title: string;
   yearEdition: number;
   publisher: string;
@@ -12,6 +13,7 @@ export class BookDto {
   authors: IAuthor[];
 
   constructor(
+    id: number,
     title: string,
     yearEdition: number,
     publisher: string,
@@ -21,6 +23,7 @@ export class BookDto {
     subject: ISubject,
     authors: IAuthor[]
   ) {
+    this.id = id;
     this.title = title;
     this.yearEdition = yearEdition;
     this.publisher = publisher;

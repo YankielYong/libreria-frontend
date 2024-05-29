@@ -41,6 +41,7 @@ class UserService {
 
   async create(user: UserDto): Promise<void> {
     try {
+      const { id, ...details } = user;
       const token = this.store.token;
       const res = await fetch(`${Configuration.BACKEND_HOST}/user`, {
         method: 'POST',
@@ -49,14 +50,14 @@ class UserService {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(user),
+        body: JSON.stringify({ ...details }),
       });
       const response = await res.json();
       if ('error' in response) {
         throw new Error(response.message);
       }
-      const { id } = response;
-      this.users.value.push({ id, ...user });
+      user.id = response.id;
+      this.users.value.push({ ...user });
     } catch (error) {
       console.log(error);
       throw new Error(`failed: ${error}`);
